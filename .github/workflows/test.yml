@@ -1,0 +1,16 @@
+---
+name: Test
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: docker build -t galactory .
+
+      - run: docker run --rm galactory
+        continue-on-error: true
