@@ -1,0 +1,6 @@
+-r ../requirements.txt
+pytest>=7.1,<8
+pytest-cov
+coverage
+ansible-runner
+ansible-core

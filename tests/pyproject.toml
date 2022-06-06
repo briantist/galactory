@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+minversion = "7.1"
+# addopts = "-ra -q"
+testpaths = [
+    "unit",
+    "integration",
+]
