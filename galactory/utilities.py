@@ -20,7 +20,7 @@ def discover_collections(repo, namespace=None, name=None, version=None):
         props = p.properties
         info = p.stat()
 
-        if info.is_dir or not props['version']:
+        if info.is_dir or not props.get('version'):
             continue
 
         manifest = load_manifest_from_artifactory(p)
