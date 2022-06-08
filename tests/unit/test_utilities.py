@@ -17,15 +17,30 @@ from galactory.utilities import (
 
 
 @pytest.fixture
-def mock_load_manifest():
+def manifest_loader():
     def _load(repo):
         return repo._galactory_get_manifest()
 
-    with mock.patch('galactory.utilities.load_manifest_from_artifactory', _load):
-        yield _load
+    loader = mock.Mock(wraps=_load)
+
+    with mock.patch('galactory.utilities.load_manifest_from_artifactory', loader):
+        yield loader
 
 
-def test_discover_collections_any(repository, mock_load_manifest):
+def test_discover_collections_skip_dirs(repository):
+    with mock.patch('artifactory.ArtifactoryFileStat', mock.Mock(return_value=mock.Mock(is_dir=True, children=[]))):
+        collections = list(discover_collections(repository))
+        assert collections == []
+
+
+@pytest.mark.parametrize('props', [{}, {'version': []}])
+def test_discover_collections_skip_missing_version(repository, props):
+    with mock.patch.object(repository.__class__, 'properties', property(mock.Mock(return_value=props))):
+        collections = list(discover_collections(repository))
+        assert collections == []
+
+
+def test_discover_collections_any(repository, manifest_loader):
     gen = discover_collections(repository)
 
     assert isinstance(gen, GeneratorType)
@@ -35,8 +50,12 @@ def test_discover_collections_any(repository, mock_load_manifest):
 
     assert len(collections) == len(contents)
 
+    assert len(contents) == manifest_loader.call_count
+
+    expected_calls = [mock.call(x) for x in contents]
+    manifest_loader.assert_has_calls(expected_calls, any_order=True)
+
     for c in collections:
-        # assert c['collection_info'] == mock_load_manifest(c)
         assert 'collection_info' in c
         assert datetime.fromisoformat(c['created']).utcoffset() == timedelta(0)
         assert datetime.fromisoformat(c['modified']).utcoffset() == timedelta(0)
