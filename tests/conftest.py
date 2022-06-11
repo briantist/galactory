@@ -5,6 +5,8 @@ import pytest
 import os
 import json
 
+# pytest_plugins = ["docker_compose"]
+
 
 @pytest.fixture(scope='session')
 def fixture_finder():
