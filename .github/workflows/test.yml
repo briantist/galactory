@@ -36,7 +36,6 @@ jobs:
     # if: github.event_name == 'push'
     needs: [test]
     runs-on: ubuntu-latest
-    env:
     steps:
       - name: Build container
         run: docker build -t galactory:latest .
