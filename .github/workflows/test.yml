@@ -4,13 +4,51 @@ on:
   push:
     branches: [main]
 
+  pull_request:
+    branches: [main]
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python:
+          - '3.8'
+          - '3.9'
+          - '3.10'
+          - '3.11'
     steps:
       - uses: actions/checkout@v3
 
-      - run: docker build -t galactory .
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
 
-      - run: docker run --rm galactory
-        continue-on-error: true
+      - name: Requirements
+        working-directory: tests
+        run: pip install -r requirements.txt
+
+      - name: Pytest
+        run: pytest tests/
+
+  docker:
+    # if: github.event_name == 'push'
+    needs: [test]
+    runs-on: ubuntu-latest
+    env:
+    steps:
+      - name: Build container
+        run: docker build -t galactory:latest .
+
+      - name: Run container
+        run: docker run --rm galactory --help
+
+      - name: Login to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push to registry
+        run: |
+          UPSTREAM=ghcr.io/${{ github.repository_owner }}/galactory
+          docker tag galactory ${UPSTREAM}:latest
+          docker push ${UPSTREAM}:latest
