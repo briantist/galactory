@@ -6,6 +6,6 @@ RUN pip install --no-cache-dir --upgrade pip setuptools \
     && pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
-COPY galactory.py .
+COPY . .
 
 ENTRYPOINT [ "python", "galactory.py" ]
