@@ -8,23 +8,7 @@ from datetime import datetime, timedelta
 from types import GeneratorType
 import semver
 
-from galactory.utilities import (
-    discover_collections,
-    collected_collections,
-    load_manifest_from_artifactory,
-    _collection_listing,
-)
-
-
-@pytest.fixture
-def manifest_loader():
-    def _load(repo):
-        return repo._galactory_get_manifest()
-
-    loader = mock.Mock(wraps=_load)
-
-    with mock.patch('galactory.utilities.load_manifest_from_artifactory', loader):
-        yield loader
+from galactory.utilities import discover_collections
 
 
 def test_discover_collections_skip_dirs(repository):
@@ -40,15 +24,24 @@ def test_discover_collections_skip_missing_version(repository, props):
         assert collections == []
 
 
-def test_discover_collections_any(repository, manifest_loader):
-    gen = discover_collections(repository)
+@pytest.mark.parametrize('namespace', [None, 'community', 'briantist', 'fake'])
+@pytest.mark.parametrize('collection', [None, 'whatever', 'hashi_vault', 'fake'])
+@pytest.mark.parametrize('version', [None, '2.5.0', '3.0.0', '0.1.0', '0.2.0', '0.0.0'])
+def test_discover_collections_any(repository, manifest_loader, namespace, collection, version):
+    gen = discover_collections(repository, namespace, collection, version)
 
     assert isinstance(gen, GeneratorType)
 
     collections = list(gen)
     contents = list(repository)
 
-    assert len(collections) == len(contents)
+    assert len(collections) <= len(contents)
+    if any([
+        namespace == 'fake',
+        collection == 'fake',
+        version == '0.0.0',
+    ]):
+        assert len(collections) == 0
 
     assert len(contents) == manifest_loader.call_count
 
@@ -70,6 +63,9 @@ def test_discover_collections_any(repository, manifest_loader):
         assert 'version' in c
         assert isinstance(c['semver'], semver.VersionInfo) and semver.VersionInfo.parse(c['version']) == c['semver']
 
+        assert namespace is None or c['namespace']['name'] == namespace
+        assert collection is None or c['name'] == collection
+        assert version is None or c['semver'] == semver.VersionInfo.parse(version)
 
         # coldata = {
         #     'collection_info': manifest['collection_info'],
