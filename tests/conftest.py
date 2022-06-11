@@ -5,7 +5,17 @@ import pytest
 import os
 import json
 
+from unittest import mock
 # pytest_plugins = ["docker_compose"]
+
+
+@pytest.fixture(scope='session')
+def disable_http():
+    def _unexpected_request(self, method, url, *args, **kwargs):
+        raise RuntimeError(f"Attempt to make {method} request to {self.scheme}://{self.host}{url}")
+
+    with mock.patch('urllib3.connectionPool.urlopen', _unexpected_request):
+        yield
 
 
 @pytest.fixture(scope='session')
