@@ -1,0 +1,24 @@
+{
+    "repo": "repo",
+    "path": "/subpath",
+    "created": "2022-05-29T18:02:46.186Z",
+    "createdBy": "briantist",
+    "lastModified": "2022-05-29T18:02:46.186Z",
+    "modifiedBy": "briantist",
+    "lastUpdated": "2022-05-29T18:02:46.186Z",
+    "children": [
+        {
+            "uri": "/briantist-whatever-0.1.0.tar.gz",
+            "folder": false
+        },
+        {
+            "uri": "/community-hashi_vault-2.5.0.tar.gz",
+            "folder": false
+        },
+        {
+            "uri": "/community-hashi_vault-3.0.0.tar.gz",
+            "folder": false
+        }
+    ],
+    "uri": "http://artifactory.example.com:8081/artifactory/api/storage/repo/subpath"
+}

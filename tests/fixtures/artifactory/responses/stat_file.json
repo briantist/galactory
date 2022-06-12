@@ -1,0 +1,23 @@
+{
+    "repo": "repo",
+    "path": "/subpath/community-hashi_vault-2.5.0.tar.gz",
+    "created": "2022-05-29T18:02:46.190Z",
+    "createdBy": "briantist",
+    "lastModified": "2022-05-29T17:59:04.998Z",
+    "modifiedBy": "briantist",
+    "lastUpdated": "2022-05-29T18:02:46.191Z",
+    "downloadUri": "http://artifactory.example.com:8081/artifactory/repo/subpath/community-hashi_vault-2.5.0.tar.gz",
+    "mimeType": "application/x-gzip",
+    "size": "201178",
+    "checksums": {
+        "sha1": "e0c4b02f97f1a600eb6daadb08ae0da64888a94e",
+        "md5": "33af1fbf210c1a1916b2b8b26cdf0418",
+        "sha256": "b8c0bdb8b219ca96c560dafb3591a11b6373f3fd39b4844925a1ce5d50222026"
+    },
+    "originalChecksums": {
+        "sha1": "e0c4b02f97f1a600eb6daadb08ae0da64888a94e",
+        "md5": "33af1fbf210c1a1916b2b8b26cdf0418",
+        "sha256": "b8c0bdb8b219ca96c560dafb3591a11b6373f3fd39b4844925a1ce5d50222026"
+    },
+    "uri": "http://artifactory.example.com:8081/artifactory/api/storage/repo/subpath/community-hashi_vault-2.5.0.tar.gz"
+}

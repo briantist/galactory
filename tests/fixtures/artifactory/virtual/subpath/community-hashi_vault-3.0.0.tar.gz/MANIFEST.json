@@ -1,0 +1,30 @@
+{
+    "collection_info": {
+        "namespace": "community",
+        "name": "hashi_vault",
+        "version": "3.0.0",
+        "authors": [
+            "your name <example@domain.com>"
+        ],
+        "readme": "README.md",
+        "tags": [],
+        "description": "your collection description",
+        "license": [
+            "GPL-2.0-or-later"
+        ],
+        "license_file": null,
+        "dependencies": {},
+        "repository": "http://example.com/repository",
+        "documentation": "http://docs.example.com",
+        "homepage": "http://example.com",
+        "issues": "http://example.com/issue/tracker"
+    },
+    "file_manifest_file": {
+        "name": "FILES.json",
+        "ftype": "file",
+        "chksum_type": "sha256",
+        "chksum_sha256": "58f8efd1f1e4f7e2afba0b773b1ec58cd3518c3c1d91bd29c54fc4187297a739",
+        "format": 1
+    },
+    "format": 1
+}

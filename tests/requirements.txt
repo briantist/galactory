@@ -1,0 +1,7 @@
+-r ../requirements.txt
+pytest>=7.1,<8
+pytest-cov
+# pytest-docker-compose
+coverage
+# ansible-runner
+# ansible-core

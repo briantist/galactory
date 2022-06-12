@@ -1,0 +1,30 @@
+{
+    "collection_info": {
+        "namespace": "briantist",
+        "name": "whatever",
+        "version": "0.1.0",
+        "authors": [
+            "your name <example@domain.com>"
+        ],
+        "readme": "README.md",
+        "tags": [],
+        "description": "your collection description",
+        "license": [
+            "GPL-2.0-or-later"
+        ],
+        "license_file": null,
+        "dependencies": {},
+        "repository": "http://example.com/repository",
+        "documentation": "http://docs.example.com",
+        "homepage": "http://example.com",
+        "issues": "http://example.com/issue/tracker"
+    },
+    "file_manifest_file": {
+        "name": "FILES.json",
+        "ftype": "file",
+        "chksum_type": "sha256",
+        "chksum_sha256": "58f8efd1f1e497e2afba0b733b1ec58cd3588c3c1d91b129c54fc4187297a739",
+        "format": 1
+    },
+    "format": 1
+}
