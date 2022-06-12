@@ -35,7 +35,6 @@ jobs:
         run: pytest tests/
 
   docker:
-    # if: github.event_name == 'push'
     needs: [test]
     runs-on: ubuntu-latest
     steps:
@@ -48,9 +47,11 @@ jobs:
         run: docker run --rm galactory --help
 
       - name: Login to registry
+        if: github.event_name == 'push'
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push to registry
+        if: github.event_name == 'push'
         run: |
           UPSTREAM=ghcr.io/${{ github.repository_owner }}/galactory
           docker tag galactory ${UPSTREAM}:latest
