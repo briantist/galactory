@@ -55,3 +55,16 @@ jobs:
           UPSTREAM=ghcr.io/${{ github.repository_owner }}/galactory
           docker tag galactory ${UPSTREAM}:latest
           docker push ${UPSTREAM}:latest
+
+      - name: Pull it
+        run: docker pull ghcr.io/briantist/galactory:latest
+
+  puller:
+    needs: [docker]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull anonmyously
+        run: docker pull ghcr.io/briantist/galactory:latest
+
+      - name: Test
+        run: docker run --rm galactory --help
