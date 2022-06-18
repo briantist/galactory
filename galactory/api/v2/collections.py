@@ -2,8 +2,9 @@
 # (c) 2022 Brian Scholer (@briantist)
 
 import semver
+import json
 from base64io import Base64IO
-from artifactory import ArtifactoryPath, ArtifactoryException
+from artifactory import ArtifactoryException
 from flask import Response, jsonify, abort, url_for, request, current_app
 
 from . import bp as v2
@@ -14,6 +15,7 @@ from ...utilities import (
     _collection_listing,
     load_manifest_from_artifactory,
     authorize,
+    _chunk_to_temp,
 )
 from ...upstream import ProxyUpstream
 
@@ -155,24 +157,27 @@ def publish():
 
     target = authorize(request, current_app.config['ARTIFACTORY_PATH'] / file.filename)
 
-    decoded = Base64IO(file)
+    with _chunk_to_temp(Base64IO(file)) as tmp:
+        if tmp.sha256 != sha256:
+            abort(Response(f"Hash mismatch: uploaded=='{sha256}', calculated=='{tmp.sha256}'", C.HTTP_INTERNAL_SERVER_ERROR))
 
-    try:
-        target.deploy(decoded, sha256=sha256)
-    except ArtifactoryException as exc:
-        cause = exc.__cause__
-        current_app.logger.debug(cause)
-        abort(Response(cause.response.text, cause.response.status_code))
-    else:
-        manifest = load_manifest_from_artifactory(target)
-        ci = manifest['collection_info']
-        props = {
-            'namespace': ci['namespace'],
-            'name': ci['name'],
-            'version': ci['version'],
-            'fqcn': f"{ci['namespace']}.{ci['name']}"
-        }
-        target.properties = props
+        try:
+            target.deploy(tmp.handle, tmp.md5, tmp.sha1, sha256)
+        except ArtifactoryException as exc:
+            cause = exc.__cause__
+            current_app.logger.debug(cause)
+            abort(Response(cause.response.text, cause.response.status_code))
+        else:
+            manifest = load_manifest_from_artifactory(target)
+            ci = manifest['collection_info']
+            props = {
+                'collection_info': json.dumps(ci),
+                'namespace': ci['namespace'],
+                'name': ci['name'],
+                'version': ci['version'],
+                'fqcn': f"{ci['namespace']}.{ci['name']}"
+            }
+            target.properties = props
 
     return jsonify(task=url_for('api.v2.import_singleton', _external=True))
 
