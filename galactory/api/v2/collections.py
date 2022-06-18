@@ -7,7 +7,13 @@ from flask import Response, jsonify, abort, url_for, request, current_app
 
 from . import bp as v2
 from ... import constants as C
-from ...utilities import discover_collections, collected_collections, _collection_listing, load_manifest_from_artifactory
+from ...utilities import (
+    discover_collections,
+    collected_collections,
+    _collection_listing,
+    load_manifest_from_artifactory,
+    authorize,
+)
 
 
 @v2.route('/collections')
@@ -20,7 +26,8 @@ def collections():
 @v2.route('/collections/<namespace>/<collection>')
 @v2.route('/collections/<namespace>/<collection>/')
 def collection(namespace, collection):
-    results = _collection_listing(current_app.config['ARTIFACTORY_PATH'], namespace, collection)
+    repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
+    results = _collection_listing(repository, namespace, collection)
     return jsonify(results[0])
 
 
@@ -28,8 +35,9 @@ def collection(namespace, collection):
 @v2.route('/collections/<namespace>/<collection>/versions/')
 def versions(namespace, collection):
     results = []
-    collections = collected_collections(current_app.config['ARTIFACTORY_PATH'], namespace=namespace, name=collection)
+    repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
 
+    collections = collected_collections(repository, namespace=namespace, name=collection)
     if not collections:
         abort(C.HTTP_NOT_FOUND)
 
@@ -63,8 +71,9 @@ def versions(namespace, collection):
 @v2.route('/collections/<namespace>/<collection>/versions/<version>')
 @v2.route('/collections/<namespace>/<collection>/versions/<version>/')
 def version(namespace, collection, version):
+    repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
     try:
-        info = next(discover_collections(current_app.config['ARTIFACTORY_PATH'], namespace=namespace, name=collection, version=version))
+        info = next(discover_collections(repository, namespace=namespace, name=collection, version=version))
     except StopIteration:
         abort(C.HTTP_NOT_FOUND)
 
@@ -93,15 +102,8 @@ def version(namespace, collection, version):
 def publish():
     sha256 = request.form['sha256']
     file = request.files['file']
-    token = None
-    authorization = request.headers.get('Authorization')
-    if authorization:
-        token = authorization.split(' ')[1]
 
-    target = current_app.config['ARTIFACTORY_PATH'] / file.filename
-
-    if token:
-        target = ArtifactoryPath(target, apikey=token)
+    target = authorize(request, current_app.config['ARTIFACTORY_PATH'] / file.filename)
 
     decoded = Base64IO(file)
 

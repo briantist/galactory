@@ -7,7 +7,23 @@ import math
 
 from urllib.request import urlopen
 
-from flask import url_for, request
+from flask import url_for, request, current_app
+from artifactory import ArtifactoryPath
+
+
+def authorize(request, artifactory_path) -> ArtifactoryPath:
+    apikey = current_app.config['ARTIFACTORY_API_KEY']
+
+    if current_app.config['USE_GALAXY_KEY'] and (not current_app.config['PREFER_CONFIGURED_KEY'] or not apikey):
+        authorization = request.headers.get('Authorization')
+        if authorization:
+            apikey = authorization.split(' ')[1]
+
+    target = artifactory_path
+    if apikey:
+        target = ArtifactoryPath(target, apikey=apikey)
+
+    return target
 
 
 def load_manifest_from_artifactory(artifact):
