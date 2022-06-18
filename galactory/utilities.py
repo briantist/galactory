@@ -3,6 +3,7 @@
 
 import json
 import semver
+import math
 
 from urllib.request import urlopen
 
@@ -107,3 +108,8 @@ def _collection_listing(repo, namespace=None, collection=None):
         results.append(result)
 
     return results
+
+
+def lcm(a, b, *more):
+    z = lcm(b, *more) if more else b
+    return abs(a * z) // math.gcd(a, z)
