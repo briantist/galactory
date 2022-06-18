@@ -15,9 +15,10 @@ class DateTimeIsoFormatJSONEncoder(JSONEncoder):
         return super().default(o)
 
 
-def create_app():
+def create_app(**config):
     app = Flask(__name__)
     app.json_encoder = DateTimeIsoFormatJSONEncoder
+    app.config.update(**config)
     app.register_blueprint(api)
 
     @app.before_request
