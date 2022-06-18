@@ -25,7 +25,12 @@ def authorize(request, artifactory_path) -> ArtifactoryPath:
 
     return target
 
-
+# TODO: this relies on a paid feature
+# We can work around it by parsing the archives as we upload,
+# and extracting the manifest at that time. We're already now
+# adding the important part (collection_info) as its own
+# property, so all read operations will be able to get it
+# that way in the future.
 def load_manifest_from_artifactory(artifact):
     with urlopen(str(artifact) + '!/MANIFEST.json') as u:
         manifest = json.load(u)
