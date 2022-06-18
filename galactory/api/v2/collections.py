@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Brian Scholer (@briantist)
 
+import semver
 from base64io import Base64IO
 from artifactory import ArtifactoryPath, ArtifactoryException
 from flask import Response, jsonify, abort, url_for, request, current_app
@@ -14,6 +15,7 @@ from ...utilities import (
     load_manifest_from_artifactory,
     authorize,
 )
+from ...upstream import ProxyUpstream
 
 
 @v2.route('/collections')
@@ -27,8 +29,32 @@ def collections():
 @v2.route('/collections/<namespace>/<collection>/')
 def collection(namespace, collection):
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
+    upstream = current_app.config['PROXY_UPSTREAM']
+    no_proxy = current_app.config['NO_PROXY_NAMESPACES']
+
+    upstream_result = None
+    if upstream and (not no_proxy or namespace not in no_proxy):
+        proxy = ProxyUpstream(repository, upstream)
+        upstream_result = proxy.proxy(request)
+
     results = _collection_listing(repository, namespace, collection)
-    return jsonify(results[0])
+
+    if not (results or upstream_result):
+        abort(C.HTTP_NOT_FOUND)
+
+    result = None
+    if results:
+        if len(results) > 1:
+            abort(C.HTTP_INTERNAL_SERVER_ERROR)
+        result = results[0]
+
+    if upstream_result:
+        if result is None:
+            result = upstream_result
+        else:
+            result = max((result, upstream_result), key=lambda r: semver.VersionInfo.parse(r['latest_version']['version']))
+
+    return jsonify(result)
 
 
 @v2.route('/collections/<namespace>/<collection>/versions')
@@ -36,14 +62,23 @@ def collection(namespace, collection):
 def versions(namespace, collection):
     results = []
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
+    upstream = current_app.config['PROXY_UPSTREAM']
+    no_proxy = current_app.config['NO_PROXY_NAMESPACES']
+
+    upstream_result = None
+    if upstream and (not no_proxy or namespace not in no_proxy):
+        proxy = ProxyUpstream(repository, upstream)
+        upstream_result = proxy.proxy(request)
 
     collections = collected_collections(repository, namespace=namespace, name=collection)
-    if not collections:
+
+    if not (collections or upstream_result):
         abort(C.HTTP_NOT_FOUND)
 
     if len(collections) > 1:
         abort(C.HTTP_INTERNAL_SERVER_ERROR)
 
+    vers = set()
     for _, c in collections.items():
         for v, i in c['versions'].items():
             results.append(
@@ -58,6 +93,12 @@ def versions(namespace, collection):
                     'version': v,
                 }
             )
+            vers.add(v)
+
+    if upstream_result:
+        for item in upstream_result['results']:
+            if item['version'] not in vers:
+                results.append(item)
 
     out = {
         'count': len(results),
@@ -72,10 +113,18 @@ def versions(namespace, collection):
 @v2.route('/collections/<namespace>/<collection>/versions/<version>/')
 def version(namespace, collection, version):
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
+    upstream = current_app.config['PROXY_UPSTREAM']
+    no_proxy = current_app.config['NO_PROXY_NAMESPACES']
+
     try:
         info = next(discover_collections(repository, namespace=namespace, name=collection, version=version))
     except StopIteration:
-        abort(C.HTTP_NOT_FOUND)
+        if upstream and (not no_proxy or namespace not in no_proxy):
+            proxy = ProxyUpstream(repository, upstream)
+            upstream_result = proxy.proxy(request)
+            return jsonify(upstream_result)
+        else:
+            abort(C.HTTP_NOT_FOUND)
 
     out = {
         'artifact': {
