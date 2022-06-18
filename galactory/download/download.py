@@ -15,13 +15,17 @@ from ..upstream import ProxyUpstream
 @dl.route('/<filename>')
 def download(filename):
     artifact = authorize(request, current_app.config['ARTIFACTORY_PATH'] / filename)
+    upstream = current_app.config['PROXY_UPSTREAM']
+    # no_proxy = current_app.config['NO_PROXY_NAMESPACES']
 
     try:
         stat = artifact.stat()
     except FileNotFoundError:
-        try:
-            upstream = current_app.config['PROXY_UPSTREAM']
-        except KeyError:
+        # Although there's a naming convention for the collection tarballs, the name is not actually
+        # at all significant for the download/install process; previous API calls gave the download
+        # URL exactly. So we don't actually have namespace information to check for no-proxying.
+        # TODO: consider whether we should filter by the naming convention, maybe configurable.
+        if not upstream:  # or not (not no_proxy or namespace not in no_proxy):
             abort(C.HTTP_NOT_FOUND)
 
         proxy = ProxyUpstream(artifact, upstream)
