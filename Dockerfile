@@ -1,11 +1,18 @@
-FROM python:3.10-slim
+FROM python:3.10-slim as build
 
-COPY requirements.txt /tmp/requirements.txt
+RUN python -m venv /venv
+ENV PATH=/venv/bin:$PATH
 
-RUN pip install --no-cache-dir --upgrade pip setuptools \
-    && pip install --no-cache-dir -r /tmp/requirements.txt \
-    && rm /tmp/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools build
 
-COPY . .
+COPY . /galactory
 
-ENTRYPOINT [ "python", "galactory.py" ]
+RUN pip install ./galactory
+
+
+FROM python:3.10-slim as final
+
+COPY --from=build /venv /venv
+ENV PATH=/venv/bin:$PATH
+
+ENTRYPOINT [ "python", "-m", "galactory" ]
