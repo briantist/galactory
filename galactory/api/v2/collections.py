@@ -4,7 +4,7 @@
 import semver
 import json
 from base64io import Base64IO
-from artifactory import ArtifactoryException
+from artifactory import ArtifactoryPath, ArtifactoryException
 from flask import Response, jsonify, abort, url_for, request, current_app
 
 from . import bp as v2
@@ -180,10 +180,3 @@ def publish():
             target.properties = props
 
     return jsonify(task=url_for('api.v2.import_singleton', _external=True))
-
-
-# TODO: optionally proxy the download from artifactory
-# will be useful if repo requires authentication to download
-# @app.route('/collections/download/<filename>')
-# def download(filename):
-#     pass

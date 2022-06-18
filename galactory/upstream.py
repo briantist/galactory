@@ -137,6 +137,21 @@ class ProxyUpstream:
         path.deploy(buffer)
         buffer.close()
 
+    @contextmanager
+    def proxy_download(self, request):
+        req = self._rewrite_to_upstream(request, self._upstream)
+        with requests.Session() as s:
+            try:
+                resp = s.send(req, stream=True)
+                resp.raise_for_status()
+            except:
+                abort(Response(resp.text, resp.status_code))
+            else:
+                try:
+                    yield resp
+                finally:
+                    resp.close()
+
     def proxy(self, request):
         cache = self._get_cache(request)
 

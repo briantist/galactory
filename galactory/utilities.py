@@ -61,7 +61,12 @@ def discover_collections(repo, namespace=None, name=None, version=None):
             'filename': p.name,
             'sha256': info.sha256,
             'size': info.size,
-            'download_url': str(p),
+            'download_url': url_for(
+                'download.download',
+                filename=p.name,
+                _external=True,
+            ),
+            # 'download_url': str(p),
             'mime_type': info.mime_type,
             'version': props['version'][0],
             'semver': semver.VersionInfo.parse(props['version'][0]),
@@ -96,7 +101,6 @@ def collected_collections(repo, namespace=None, name=None):
                     col['latest'] = c
 
     return collections
-
 
 
 def _collection_listing(repo, namespace=None, collection=None):

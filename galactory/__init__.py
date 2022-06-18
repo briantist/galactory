@@ -5,6 +5,7 @@ from datetime import datetime
 from flask import Flask, request
 from flask.json import JSONEncoder
 from .api import bp as api
+from .download import bp as download
 
 
 class DateTimeIsoFormatJSONEncoder(JSONEncoder):
@@ -20,6 +21,7 @@ def create_app(**config):
     app.json_encoder = DateTimeIsoFormatJSONEncoder
     app.config.update(**config)
     app.register_blueprint(api)
+    app.register_blueprint(download)
 
     @app.before_request
     def log():
