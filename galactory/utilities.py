@@ -105,14 +105,14 @@ def _collection_listing(repo, namespace=None, collection=None):
             'created': latest['created'],
             'modified': latest['modified'],
             'versions_url': url_for(
-                'versions',
+                'api.v2.versions',
                 namespace=latest['namespace']['name'],
                 collection=latest['name'],
                 _external=True,
             ),
             'latest_version': {
                 'href': url_for(
-                    'version',
+                    'api.v2.version',
                     namespace=latest['namespace']['name'],
                     collection=latest['name'],
                     version=latest['version'],

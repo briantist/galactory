@@ -49,7 +49,7 @@ def versions(namespace, collection):
             results.append(
                 {
                     'href': url_for(
-                        'version',
+                        'api.v2.version',
                         namespace=i['namespace']['name'],
                         collection=i['name'],
                         version=v,
@@ -84,6 +84,7 @@ def version(namespace, collection, version):
             'size': info['size'],
         },
         'collection': {
+            'href': url_for('api.v2.collection', namespace=namespace, collection=collection, _external=True),
             'name': info['name'],
         },
         'namespace': info['namespace'],
@@ -124,7 +125,7 @@ def publish():
         }
         target.properties = props
 
-    return jsonify(task=url_for('import_singleton', _external=True))
+    return jsonify(task=url_for('api.v2.import_singleton', _external=True))
 
 
 # TODO: optionally proxy the download from artifactory
