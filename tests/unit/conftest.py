@@ -16,6 +16,12 @@ def app():
 
 
 @pytest.fixture
+def app_request_context(app):
+    with app.app_context(), app.test_request_context():
+        yield
+
+
+@pytest.fixture
 def client(app):
     return app.test_client()
 
