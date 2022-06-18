@@ -4,7 +4,7 @@
 import semver
 import json
 from base64io import Base64IO
-from artifactory import ArtifactoryPath, ArtifactoryException
+from artifactory import ArtifactoryException
 from flask import Response, jsonify, abort, url_for, request, current_app
 
 from . import bp as v2
