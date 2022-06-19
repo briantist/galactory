@@ -74,7 +74,7 @@ jobs:
           expected_sdist=galactory-${VER_TAG}.tar.gz
           expected_wheel=galactory-${VER_TAG}-py3-none-any.whl
 
-          if [ ! -f "dist/${expected_sdist}"] || [ ! -f "dist/${expected_wheel}" ]
+          if [ ! -f "dist/${expected_sdist}" ] || [ ! -f "dist/${expected_wheel}" ]
           then
             exit 1
           fi
