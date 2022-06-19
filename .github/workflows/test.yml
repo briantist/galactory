@@ -97,7 +97,7 @@ jobs:
         run: docker build -t ${UPSTREAM}:latest -t ${UPSTREAM}:${{ startsWith(github.ref, 'refs/tags/') && needs.build.outputs.relver || github.sha }} .
 
       - name: Run container
-        run: docker run --rm galactory --help
+        run: docker run --rm ${UPSTREAM}:latest --help
 
       - name: Login to registry
         if: github.event_name == 'push'
