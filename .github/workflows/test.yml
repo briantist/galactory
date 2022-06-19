@@ -57,10 +57,13 @@ jobs:
           python-version: '3.10'
 
       - name: Pre-reqs
-        run: pip install --upgrade pip setuptools build
+        run: pip install --upgrade pip setuptools build twine
 
       - name: Build
         run: python -m build
+
+      - name: Test build
+        run: python -m twine check dist/*
 
       - name: Check version
         if: startsWith(github.ref, 'refs/tags/')
@@ -112,9 +115,19 @@ jobs:
           name: dist
           path: dist
 
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@717ba43cfbb0387f6ce311b169a825772f54d295
+        with:
+          user: __token__
+          password: ${{ secrets.pypi }}
+
       - uses: softprops/action-gh-release@50195ba7f6f93d1ac97ba8332a178e008ad176aa
         if: startsWith(github.ref, 'refs/tags/')
         with:
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: dist/*
+          body: |
+            PyPI: https://pypi.org/project/galactory/${{ needs.build.outputs.relver }}/
+            Container: `ghcr.io/${{ github.repository }}:${{ needs.build.outputs.relver }}`
+            Browse container tags: https://github.com/briantist/galactory/pkgs/container/galactory
