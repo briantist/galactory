@@ -1,4 +1,6 @@
 *
 !requirements.txt
 !galactory/
-!galactory.py
+!LICENSE
+!setup.cfg
+!pyproject.toml

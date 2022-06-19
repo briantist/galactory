@@ -26,7 +26,7 @@ def test_collected_collections_skip_missing_version(repository, props):
 
 @pytest.mark.parametrize('namespace', [None, 'community', 'briantist', 'fake'])
 @pytest.mark.parametrize('collection', [None, 'whatever', 'hashi_vault', 'fake'])
-def test_collected_collections_any(repository, discover_collections, namespace, collection):
+def test_collected_collections_any(repository, discover_collections, namespace, collection, app_request_context):
     fqcn = None if any([namespace is None, collection is None]) else f"{namespace}.{collection}"
 
     collections = collected_collections(repository, namespace, collection)

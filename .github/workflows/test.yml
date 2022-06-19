@@ -3,12 +3,15 @@ name: Test
 on:
   push:
     branches: [main]
+    tags: ['v*.*.*']
 
   pull_request:
     branches: [main]
 
 jobs:
   test:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -34,8 +37,11 @@ jobs:
       - name: Pytest
         run: pytest tests/
 
-  docker:
+
+  build:
     needs: [test]
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -46,13 +52,69 @@ jobs:
       - name: Run container
         run: docker run --rm galactory --help
 
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Pre-reqs
+        run: pip install --upgrade pip setuptools build
+
+      - name: Build
+        run: python -m build
+
+      - name: Check version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          VER_TAG=${GITHUB_REF/refs\/tags\/v/}
+          echo "::set-output name=relver::${VER_TAG}"
+
+          expected_sdist=galactory-${VER_TAG}.tar.gz
+          expected_wheel=galactory-${VER_TAG}-py3-none-any.whl
+
+          if [ ! -f "dist/${expected_sdist}"] || [ ! -f "dist/${expected_wheel}" ]
+          then
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+          retention-days: ${{ github.event_name == 'push' && 90 || 7 }}
+          if-no-files-found: error
+
+
+  release:
+    needs: [build]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      UPSTREAM: ghcr.io/${{ github.repository_owner }}/galactory
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build container
+        run: docker build -t ${UPSTREAM}:latest -t ${UPSTREAM}:${{ startsWith(github.ref, 'refs/tags/') && needs.build.outputs.relver || github.sha }} .
+
+      - name: Run container
+        run: docker run --rm galactory --help
+
       - name: Login to registry
         if: github.event_name == 'push'
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push to registry
         if: github.event_name == 'push'
-        run: |
-          UPSTREAM=ghcr.io/${{ github.repository_owner }}/galactory
-          docker tag galactory ${UPSTREAM}:latest
-          docker push ${UPSTREAM}:latest
+        run: docker push --all-tags
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      - uses: softprops/action-gh-release@50195ba7f6f93d1ac97ba8332a178e008ad176aa
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: dist/*
