@@ -19,6 +19,7 @@ if __name__ == '__main__':
     )
     parser.add_argument('--listen-addr', default='0.0.0.0', type=str, help='The IP address to listen on.')
     parser.add_argument('--listen-port', default=5555, type=int, help='The TCP port to listen on.')
+    parser.add_argument('--server-name', type=str, help='The host name and port of the server, as seen from clients. Used for generating links.')
     parser.add_argument('--artifactory-path', type=str, required=True, help='The URL of the path in Artifactory where collections are stored.')
     parser.add_argument('--artifactory-api-key', default=os.environ.get('GALACTORY_ARTIFACTORY_API_KEY'), help='If set, is the API key used to access Artifactory.')
     parser.add_argument('--use-galaxy-key', action='store_true', help='If set, uses the Galaxy token as the Artifactory API key.')
@@ -47,6 +48,7 @@ if __name__ == '__main__':
         ARTIFACTORY_API_KEY=args.artifactory_api_key,
         USE_GALAXY_KEY=args.use_galaxy_key,
         PREFER_CONFIGURED_KEY=args.prefer_configured_key,
+        SERVER_NAME=args.server_name,
     )
 
     print(app.url_map)

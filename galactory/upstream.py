@@ -170,16 +170,15 @@ class ProxyUpstream:
                     # else:
                         # abort(Response(resp.text, resp.status_code))
 
-
                 else:
                     current_app.logger.info(f"Cache miss: {request.url}")
-                    data = self._rewrite_upstream_response(resp.json(), request.url_root)
+                    data = resp.json()
                     cache.data = data
                     self._set_cache(request, cache)
         else:
             current_app.logger.info(f"Cache hit: {request.url}")
 
-        return cache.data
+        return self._rewrite_upstream_response(cache.data, request.url_root)
 
     def _rewrite_upstream_response(self, response_data, url_root) -> dict:
         ret = {}
