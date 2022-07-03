@@ -49,14 +49,17 @@ def artifactory_authed(artifactory, artifactory_user):
 @pytest.fixture(scope='session')
 def artifactory_generic_repository(artifactory_authed):
     name = 'example-repo-local'
-    repo = artifactory_authed.find_repository_local(name)
+    # repo = artifactory_authed.find_repository_local(name)
+    # ^ can't use this, requires pro license 🙄
 
-    if repo:
-        if repo is RepositoryLocal.GENERIC:
-            return repo
-        else:
-            raise ValueError("existing repository is the wrong type.")
+    for repo in artifactory_authed.get_repositories():
+        if repo.name == name:
+            if repo.package_type == RepositoryLocal.GENERIC:
+                return repo
+            else:
+                raise ValueError("existing repository is the wrong type.")
 
+    # this is going to fail without a pro license
     repo = RepositoryLocal(artifactory_authed, name=name, package_type=RepositoryLocal.GENERIC)
     repo.create()
 
