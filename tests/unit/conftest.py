@@ -99,7 +99,7 @@ def mock_artifactory_path(mock_artifactory_accessor, virtual_fs_repo):
             ci = self._galactory_get_manifest('collection_info')
 
             return {
-                'collection_info': json.dumps(ci),
+                'collection_info': [json.dumps(ci)],
                 'fqcn': [f"{ci['namespace']}.{ci['name']}"],
                 'namespace': [ci['namespace']],
                 'name': [ci['name']],
