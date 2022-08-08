@@ -62,18 +62,43 @@ def load_manifest_from_artifactory(artifact):
     return manifest
 
 
-def discover_collections(repo, namespace=None, name=None, version=None):
+def discover_collections(repo, namespace=None, name=None, version=None, fast_detection=True):
     for p in repo:
-        props = p.properties
-        info = p.stat()
+        if fast_detection:
+            # we're going to use the naming convention to eliminate candidates early,
+            # to avoid excessive additional requests for properties and stat that slow
+            # down the listing immensely as the number of collections grows.
+            try:
+                f_namespace, f_name, f_version = p.name.replace('.tar.gz', '').split('-')
+            except ValueError:
+                pass
+            else:
+                if not all(
+                    (
+                        not namespace or f_namespace == namespace,
+                        not name or f_name == name,
+                        not version or f_version == version
+                    )
+                ):
+                    continue
 
-        if info.is_dir or not props.get('version'):
+        info = p.stat()
+        if info.is_dir:
             continue
 
-        manifest = load_manifest_from_artifactory(p)
+        props = p.properties
+        if not props.get('version'): # TODO: change to collection_info
+            continue
+
+        if 'collection_info' in props:
+            collection_info = json.loads(props['collection_info'][0])
+        else:
+            # fallback for now just in case, we expect this never to be hit
+            # TODO: remove in the next version
+            collection_info = load_manifest_from_artifactory(p)['collection_info']
 
         coldata = {
-            'collection_info': manifest['collection_info'],
+            'collection_info': collection_info,
             'fqcn': props['fqcn'][0],
             'created': info.ctime.isoformat(),
             'modified': info.mtime.isoformat(),
