@@ -45,9 +45,7 @@ def authorize(request, artifactory_path, retry=None) -> ArtifactoryPath:
         auth = XJFrogArtApiAuth(apikey)
 
     session = _session_with_retries(retry=retry, auth=auth)
-    target = ArtifactoryPath(artifactory_path, session=session)
-
-    return target
+    return ArtifactoryPath(artifactory_path, session=session)
 
 
 # TODO: this relies on a paid feature
