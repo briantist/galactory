@@ -10,12 +10,26 @@ from collections import namedtuple
 from tempfile import SpooledTemporaryFile
 from contextlib import contextmanager
 from urllib.request import urlopen
+from urllib3 import Retry
+from requests.adapters import HTTPAdapter
+from requests import Session
 
 from flask import url_for, request, current_app
 from artifactory import ArtifactoryPath
 
 
-def authorize(request, artifactory_path) -> ArtifactoryPath:
+def _session_with_retries(retry=None, auth=None) -> Session:
+    if retry is None:
+        retry = Retry(connect=5, read=3, redirect=2, status=6, other=3, backoff_factor=0.1, raise_on_status=False)
+
+    adapter = HTTPAdapter(max_retries=retry)
+    session = Session()
+    session.auth = auth
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+
+    return session
+
     apikey = current_app.config['ARTIFACTORY_API_KEY']
 
     if current_app.config['USE_GALAXY_KEY'] and (not current_app.config['PREFER_CONFIGURED_KEY'] or not apikey):
