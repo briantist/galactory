@@ -11,10 +11,9 @@ exclude = ["changelogs"]
 
 [tool.pytest.ini_options]
 minversion = "7.1"
-addopts = "--cov --cov-report=xml"
-# addopts = "--docker-compose=artifactory/docker-compose.yml"
+addopts = "--cov --cov-report=xml --docker-compose=artifactory/docker-compose.yml --use-running-containers"
 # addopts = "-ra -q"
 testpaths = [
     "unit",
-    # "integration",
+    "integration",
 ]

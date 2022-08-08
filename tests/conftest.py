@@ -28,6 +28,22 @@ def fixture_finder():
 
 
 @pytest.fixture(scope='session')
+def data_finder():
+    def _finder(*paths):
+        here = os.path.dirname(os.path.realpath(__file__))
+        data = os.path.join(here, 'data', *paths)
+        return data
+    return _finder
+
+
+@pytest.fixture(scope='session')
+def collection_finder(data_finder):
+    def _finder(*paths):
+        return data_finder('collections', *paths)
+    return _finder
+
+
+@pytest.fixture(scope='session')
 def fixture_loader(fixture_finder):
     class FixtureLoader:
         @staticmethod
