@@ -16,6 +16,7 @@ from requests import Session
 
 from flask import url_for, request, current_app
 from artifactory import ArtifactoryPath
+from dohq_artifactory.auth import XJFrogArtApiAuth
 
 
 def _session_with_retries(retry=None, auth=None) -> Session:
@@ -30,6 +31,9 @@ def _session_with_retries(retry=None, auth=None) -> Session:
 
     return session
 
+
+def authorize(request, artifactory_path, retry=None) -> ArtifactoryPath:
+    auth = None
     apikey = current_app.config['ARTIFACTORY_API_KEY']
 
     if current_app.config['USE_GALAXY_KEY'] and (not current_app.config['PREFER_CONFIGURED_KEY'] or not apikey):
@@ -37,11 +41,14 @@ def _session_with_retries(retry=None, auth=None) -> Session:
         if authorization:
             apikey = authorization.split(' ')[1]
 
-    target = artifactory_path
     if apikey:
-        target = ArtifactoryPath(target, apikey=apikey)
+        auth = XJFrogArtApiAuth(apikey)
+
+    session = _session_with_retries(retry=retry, auth=auth)
+    target = ArtifactoryPath(artifactory_path, session=session)
 
     return target
+
 
 # TODO: this relies on a paid feature
 # We can work around it by parsing the archives as we upload,
