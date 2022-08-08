@@ -10,12 +10,30 @@ from collections import namedtuple
 from tempfile import SpooledTemporaryFile
 from contextlib import contextmanager
 from urllib.request import urlopen
+from urllib3 import Retry
+from requests.adapters import HTTPAdapter
+from requests import Session
 
 from flask import url_for, request, current_app
 from artifactory import ArtifactoryPath
+from dohq_artifactory.auth import XJFrogArtApiAuth
 
 
-def authorize(request, artifactory_path) -> ArtifactoryPath:
+def _session_with_retries(retry=None, auth=None) -> Session:
+    if retry is None:
+        retry = Retry(connect=5, read=3, redirect=2, status=6, other=3, backoff_factor=0.1, raise_on_status=False)
+
+    adapter = HTTPAdapter(max_retries=retry)
+    session = Session()
+    session.auth = auth
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+
+    return session
+
+
+def authorize(request, artifactory_path, retry=None) -> ArtifactoryPath:
+    auth = None
     apikey = current_app.config['ARTIFACTORY_API_KEY']
 
     if current_app.config['USE_GALAXY_KEY'] and (not current_app.config['PREFER_CONFIGURED_KEY'] or not apikey):
@@ -23,11 +41,12 @@ def authorize(request, artifactory_path) -> ArtifactoryPath:
         if authorization:
             apikey = authorization.split(' ')[1]
 
-    target = artifactory_path
     if apikey:
-        target = ArtifactoryPath(target, apikey=apikey)
+        auth = XJFrogArtApiAuth(apikey)
 
-    return target
+    session = _session_with_retries(retry=retry, auth=auth)
+    return ArtifactoryPath(artifactory_path, session=session)
+
 
 # TODO: this relies on a paid feature
 # We can work around it by parsing the archives as we upload,
@@ -41,18 +60,43 @@ def load_manifest_from_artifactory(artifact):
     return manifest
 
 
-def discover_collections(repo, namespace=None, name=None, version=None):
+def discover_collections(repo, namespace=None, name=None, version=None, fast_detection=True):
     for p in repo:
-        props = p.properties
-        info = p.stat()
+        if fast_detection:
+            # we're going to use the naming convention to eliminate candidates early,
+            # to avoid excessive additional requests for properties and stat that slow
+            # down the listing immensely as the number of collections grows.
+            try:
+                f_namespace, f_name, f_version = p.name.replace('.tar.gz', '').split('-')
+            except ValueError:
+                pass
+            else:
+                if not all(
+                    (
+                        not namespace or f_namespace == namespace,
+                        not name or f_name == name,
+                        not version or f_version == version
+                    )
+                ):
+                    continue
 
-        if info.is_dir or not props.get('version'):
+        info = p.stat()
+        if info.is_dir:
             continue
 
-        manifest = load_manifest_from_artifactory(p)
+        props = p.properties
+        if not props.get('version'): # TODO: change to collection_info
+            continue
+
+        if 'collection_info' in props:
+            collection_info = json.loads(props['collection_info'][0])
+        else:
+            # fallback for now just in case, we expect this never to be hit
+            # TODO: remove in the next version
+            collection_info = load_manifest_from_artifactory(p)['collection_info']
 
         coldata = {
-            'collection_info': manifest['collection_info'],
+            'collection_info': collection_info,
             'fqcn': props['fqcn'][0],
             'created': info.ctime.isoformat(),
             'modified': info.mtime.isoformat(),

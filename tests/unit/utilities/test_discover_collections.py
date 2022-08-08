@@ -43,10 +43,10 @@ def test_discover_collections_any(repository, manifest_loader, namespace, collec
     ]):
         assert len(collections) == 0
 
-    assert len(contents) == manifest_loader.call_count
-
-    expected_calls = [mock.call(x) for x in contents]
-    manifest_loader.assert_has_calls(expected_calls, any_order=True)
+    # TODO: we're phasing out the manifest loader, remove later
+    # assert len(contents) == manifest_loader.call_count
+    # expected_calls = [mock.call(x) for x in contents]
+    # manifest_loader.assert_has_calls(expected_calls, any_order=True)
 
     for c in collections:
         assert 'collection_info' in c

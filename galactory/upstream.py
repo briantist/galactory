@@ -12,7 +12,7 @@ from artifactory import ArtifactoryException
 from flask import current_app, abort, Response
 
 from . import constants as C
-
+from .utilities import _session_with_retries
 
 class _CacheEntry:
     _raw = {}
@@ -140,7 +140,7 @@ class ProxyUpstream:
     @contextmanager
     def proxy_download(self, request):
         req = self._rewrite_to_upstream(request, self._upstream)
-        with requests.Session() as s:
+        with _session_with_retries() as s:
             try:
                 resp = s.send(req, stream=True)
                 resp.raise_for_status()
@@ -157,7 +157,7 @@ class ProxyUpstream:
 
         if cache.empty or cache.expired:
             req = self._rewrite_to_upstream(request, self._upstream)
-            with requests.Session() as s:
+            with _session_with_retries() as s:
                 try:
                     resp = s.send(req)
                     resp.raise_for_status()
