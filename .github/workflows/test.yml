@@ -61,13 +61,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build
+      - name: Build amd64
         uses: docker/build-push-action@v3
         with:
           push: false
           context: .
           load: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           tags: galactory:latest
 
       # - name: Build container
@@ -75,6 +75,14 @@ jobs:
 
       - name: Run container
         run: docker run --rm galactory --help
+
+      - name: Build arm64
+        uses: docker/build-push-action@v3
+        with:
+          push: false
+          context: .
+          platforms: linux/arm64
+          tags: galactory:latest
 
       - uses: actions/setup-python@v4
         with:
