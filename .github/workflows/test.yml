@@ -23,6 +23,8 @@ jobs:
           # - '3.11-dev'  # test broken:  AttributeError: module 'pathlib' has no attribute '_Accessor'
     env:
       PYTEST_ADDOPTS: '--color=yes'
+    outputs:
+      relver: ${{ steps.sever.outputs.relver }}
     steps:
       - uses: actions/checkout@v3
 
@@ -37,22 +39,40 @@ jobs:
       - name: Pytest
         run: pytest tests/
 
+      - name: Set version
+        id: setver
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          VER_TAG=${GITHUB_REF/refs\/tags\/v/}
+          echo "::set-output name=relver::${VER_TAG}"
+
 
   build:
     needs: [test]
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    outputs:
-      relver: ${{ steps.checkver.outputs.relver }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
-      - name: Build container
-        run: docker build -t galactory:latest .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: false
+          platforms: linux/amd64,linux/arm64
+          tags: galactory:latest
+
+      # - name: Build container
+      #   run: docker build -t galactory:latest .
 
       - name: Run container
         run: docker run --rm galactory --help
+
+      - uses: actions/checkout@v3
 
       - uses: actions/setup-python@v4
         with:
@@ -71,8 +91,7 @@ jobs:
         id: checkver
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          VER_TAG=${GITHUB_REF/refs\/tags\/v/}
-          echo "::set-output name=relver::${VER_TAG}"
+          VER_TAG=${{ needs.test.outputs.relver }}
 
           expected_sdist=galactory-${VER_TAG}.tar.gz
           expected_wheel=galactory-${VER_TAG}-py3-none-any.whl
@@ -91,7 +110,7 @@ jobs:
 
 
   release:
-    needs: [build]
+    needs: [test, build]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
@@ -100,7 +119,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Build container
-        run: docker build -t ${UPSTREAM}:latest -t ${UPSTREAM}:${{ startsWith(github.ref, 'refs/tags/') && needs.build.outputs.relver || github.sha }} .
+        run: docker build -t ${UPSTREAM}:latest -t ${UPSTREAM}:${{ startsWith(github.ref, 'refs/tags/') && needs.test.outputs.relver || github.sha }} .
 
       - name: Run container
         run: docker run --rm ${UPSTREAM}:latest --help
@@ -134,6 +153,6 @@ jobs:
           fail_on_unmatched_files: true
           files: dist/*
           body: |
-            PyPI: https://pypi.org/project/galactory/${{ needs.build.outputs.relver }}/
-            Container: `ghcr.io/${{ github.repository }}:${{ needs.build.outputs.relver }}`
+            PyPI: https://pypi.org/project/galactory/${{ needs.test.outputs.relver }}/
+            Container: `ghcr.io/${{ github.repository }}:${{ needs.test.outputs.relver }}`
             Browse container tags: https://github.com/briantist/galactory/pkgs/container/galactory
