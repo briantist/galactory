@@ -61,11 +61,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build and push
+      - name: Build
         uses: docker/build-push-action@v3
         with:
           push: false
           context: .
+          load: true
           platforms: linux/amd64,linux/arm64
           tags: galactory:latest
 
@@ -119,19 +120,35 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build container
-        run: docker build -t ${UPSTREAM}:latest -t ${UPSTREAM}:${{ startsWith(github.ref, 'refs/tags/') && needs.test.outputs.relver || github.sha }} .
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
-      - name: Run container
-        run: docker run --rm ${UPSTREAM}:latest --help
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to registry
         if: github.event_name == 'push'
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Push to registry
-        if: github.event_name == 'push'
-        run: docker push --all-tags ${UPSTREAM}
+      - name: Build & Push
+        uses: docker/build-push-action@v3
+        with:
+          push: ${{ github.event_name == 'push' }}
+          context: .
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${UPSTREAM}:latest
+            ${UPSTREAM}:${{ startsWith(github.ref, 'refs/tags/') && needs.test.outputs.relver || github.sha }}
+
+      # - name: Build container
+      #   run: docker build -t ${UPSTREAM}:latest -t ${UPSTREAM}:${{ startsWith(github.ref, 'refs/tags/') && needs.test.outputs.relver || github.sha }} .
+
+      # - name: Run container
+      #   run: docker run --rm ${UPSTREAM}:latest --help
+
+      # - name: Push to registry
+      #   if: github.event_name == 'push'
+      #   run: docker push --all-tags ${UPSTREAM}
 
       - uses: actions/download-artifact@v3
         with:
