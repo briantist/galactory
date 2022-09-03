@@ -143,8 +143,8 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           tags: |
-            ${UPSTREAM}:${{ startsWith(github.ref, 'refs/tags/') && 'latest' || needs.test.outputs.branch }}
-            ${UPSTREAM}:${{ startsWith(github.ref, 'refs/tags/') && needs.test.outputs.relver || github.sha }}
+            ${{ env.UPSTREAM }}:${{ startsWith(github.ref, 'refs/tags/') && 'latest' || needs.test.outputs.branch }}
+            ${{ env.UPSTREAM }}:${{ startsWith(github.ref, 'refs/tags/') && needs.test.outputs.relver || github.sha }}
 
       - uses: actions/download-artifact@v3
         with:
