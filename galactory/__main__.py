@@ -3,14 +3,14 @@
 
 import os
 import logging
-from argparse import ArgumentParser
+from configargparse import ArgParser
 from artifactory import ArtifactoryPath
 
 from . import create_app
 
 
 if __name__ == '__main__':
-    parser = ArgumentParser(
+    parser = ArgParser(
         prog='python -m galactory',
         description=(
             'galactory is a partial Ansible Galaxy proxy that uploads and downloads collections, '
