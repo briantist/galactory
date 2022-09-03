@@ -54,6 +54,13 @@ python3 -m pip install galactory
 ```
 
 ## Container
+
+Latest tagged release:
 ```shell
 docker run --rm ghcr.io/briantist/galactory:latest --help
+```
+
+Latest commit on `main`:
+```shell
+docker run --rm ghcr.io/briantist/galactory:main --help
 ```
