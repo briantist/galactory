@@ -17,7 +17,7 @@ if __name__ == '__main__':
         ),
         default_config_files=['/etc/galactory.d/*.conf', '~/.galactory/*.conf'],
     )
-    parser.add_argument('-c', '--config', required=False, is_config_file=True, help='The path to a config file.')
+    parser.add_argument('-c', '--config', required=False, is_config_file=True, env_var='GALACTORY_CONFIG', help='The path to a config file.')
     parser.add_argument('--listen-addr', default='0.0.0.0', type=str, env_var='GALACTORY_LISTEN_ADDR', help='The IP address to listen on.')
     parser.add_argument('--listen-port', default=5555, type=int, env_var='GALACTORY_LISTEN_PORT', help='The TCP port to listen on.')
     parser.add_argument('--server-name', type=str, env_var='GALACTORY_SERVER_NAME', help='The host name and port of the server, as seen from clients. Used for generating links.')
