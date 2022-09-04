@@ -31,7 +31,8 @@ usage: python -m galactory [-h] [-c CONFIG] [--listen-addr LISTEN_ADDR]
                            [--prefer-configured-key] [--log-file LOG_FILE]
                            [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--log-headers]
                            [--log-body] [--proxy-upstream PROXY_UPSTREAM]
-                           [-npns NO_PROXY_NAMESPACE]
+                           [-npns NO_PROXY_NAMESPACE] [--cache-minutes CACHE_MINUTES]
+                           [--cache-read CACHE_READ] [--cache-write CACHE_WRITE]
 
 galactory is a partial Ansible Galaxy proxy that uploads and downloads collections, using an
 Artifactory generic repository as its backend.
@@ -48,30 +49,40 @@ optional arguments:
                         The host name and port of the server, as seen from clients. Used for
                         generating links. [env var: GALACTORY_SERVER_NAME]
   --artifactory-path ARTIFACTORY_PATH
-                        The URL of the path in Artifactory where collections are stored. [env var:
-                        GALACTORY_ARTIFACTORY_PATH]
+                        The URL of the path in Artifactory where collections are stored.
+                        [env var: GALACTORY_ARTIFACTORY_PATH]
   --artifactory-api-key ARTIFACTORY_API_KEY
-                        If set, is the API key used to access Artifactory. [env var:
-                        GALACTORY_ARTIFACTORY_API_KEY]
-  --use-galaxy-key      If set, uses the Galaxy token as the Artifactory API key. [env var:
-                        GALACTORY_USE_GALAXY_KEY]
+                        If set, is the API key used to access Artifactory.
+                        [env var: GALACTORY_ARTIFACTORY_API_KEY]
+  --use-galaxy-key      If set, uses the Galaxy token as the Artifactory API key.
+                        [env var: GALACTORY_USE_GALAXY_KEY]
   --prefer-configured-key
-                        If set, prefer the confgured Artifactory key over the Galaxy token. [env
-                        var: GALACTORY_PREFER_CONFIGURED_KEY]
-  --log-file LOG_FILE   If set, logging will go to this file instead of the console. [env var:
-                        GALACTORY_LOG_FILE]
+                        If set, prefer the confgured Artifactory key over the Galaxy token.
+                        [env var: GALACTORY_PREFER_CONFIGURED_KEY]
+  --log-file LOG_FILE   If set, logging will go to this file instead of the console.
+                        [env var: GALACTORY_LOG_FILE]
   --log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}
                         The desired logging level. [env var: GALACTORY_LOG_LEVEL]
-  --log-headers         Log the headers of every request (DEBUG level only). [env var:
-                        GALACTORY_LOG_HEADERS]
-  --log-body            Log the body of every request (DEBUG level only). [env var:
-                        GALACTORY_LOG_BODY]
+  --log-headers         Log the headers of every request (DEBUG level only).
+                        [env var: GALACTORY_LOG_HEADERS]
+  --log-body            Log the body of every request (DEBUG level only).
+                        [env var: GALACTORY_LOG_BODY]
   --proxy-upstream PROXY_UPSTREAM
                         If set, then find, pull and cache results from the specified galaxy server
                         in addition to local. [env var: GALACTORY_PROXY_UPSTREAM]
   -npns NO_PROXY_NAMESPACE, --no-proxy-namespace NO_PROXY_NAMESPACE
                         Requests for this namespace should never be proxied. Can be specified
                         multiple times. [env var: GALACTORY_NO_PROXY_NAMESPACE]
+  --cache-minutes CACHE_MINUTES
+                        The time period that a cache entry should be considered valid.
+                        [env var: GALACTORY_CACHE_MINUTES]
+  --cache-read CACHE_READ
+                        Look for upsteam caches and use their values.
+                        [env var: GALACTORY_CACHE_READ]
+  --cache-write CACHE_WRITE
+                        Populate the upstream cache in Artifactory. Should be false when no API key is
+                        provided or the key has no permission to write.
+                        [env var: GALACTORY_CACHE_WRITE]
 
 Args that start with '--' (eg. --listen-addr) can also be set in a config file
 (/etc/galactory.d/*.conf or ~/.galactory/*.conf or specified via -c). Config file syntax allows:

@@ -33,10 +33,13 @@ def collection(namespace, collection):
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
     upstream = current_app.config['PROXY_UPSTREAM']
     no_proxy = current_app.config['NO_PROXY_NAMESPACES']
+    cache_minutes = current_app.config['CACHE_MINUTES']
+    cache_read = current_app.config['CACHE_READ']
+    cache_write = current_app.config['CACHE_WRITE']
 
     upstream_result = None
     if upstream and (not no_proxy or namespace not in no_proxy):
-        proxy = ProxyUpstream(repository, upstream)
+        proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
         upstream_result = proxy.proxy(request)
 
     results = _collection_listing(repository, namespace, collection)
@@ -66,10 +69,13 @@ def versions(namespace, collection):
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
     upstream = current_app.config['PROXY_UPSTREAM']
     no_proxy = current_app.config['NO_PROXY_NAMESPACES']
+    cache_minutes = current_app.config['CACHE_MINUTES']
+    cache_read = current_app.config['CACHE_READ']
+    cache_write = current_app.config['CACHE_WRITE']
 
     upstream_result = None
     if upstream and (not no_proxy or namespace not in no_proxy):
-        proxy = ProxyUpstream(repository, upstream)
+        proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
         upstream_result = proxy.proxy(request)
 
     collections = collected_collections(repository, namespace=namespace, name=collection)
@@ -117,12 +123,15 @@ def version(namespace, collection, version):
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
     upstream = current_app.config['PROXY_UPSTREAM']
     no_proxy = current_app.config['NO_PROXY_NAMESPACES']
+    cache_minutes = current_app.config['CACHE_MINUTES']
+    cache_read = current_app.config['CACHE_READ']
+    cache_write = current_app.config['CACHE_WRITE']
 
     try:
         info = next(discover_collections(repository, namespace=namespace, name=collection, version=version))
     except StopIteration:
         if upstream and (not no_proxy or namespace not in no_proxy):
-            proxy = ProxyUpstream(repository, upstream)
+            proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
             upstream_result = proxy.proxy(request)
             return jsonify(upstream_result)
         else:

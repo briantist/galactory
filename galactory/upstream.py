@@ -34,7 +34,7 @@ class _CacheEntry:
         loaded = json.load(f, object_pairs_hook=_time_decoder)
         return cls(data=loaded['data'], metadata=loaded['metadata'], **kwargs)
 
-    def __init__(self, data=None, metadata=None, expiry_delta=timedelta(hours=1), calculate_expiry_on_read=False) -> None:
+    def __init__(self, expiry_delta, data=None, metadata=None, calculate_expiry_on_read=True) -> None:
         raw = {'metadata': {}, 'data': {}}
         self._expiry_delta = expiry_delta
         self._calc_on_read = calculate_expiry_on_read
@@ -113,29 +113,41 @@ class _CacheEntry:
 class ProxyUpstream:
     _cache_path = '_cache'
 
-    def __init__(self, repository, upstream_url) -> None:
+    def __init__(self, repository, upstream_url, read_cache, write_cache, cache_expiry_minutes) -> None:
         self._repository = repository
         self._upstream = upstream_url
+        self._read_cache = read_cache
+        self._write_cache = write_cache
+        self._cache_expiry_delta = timedelta(minutes=cache_expiry_minutes)
 
-    def _get_cache(self, request, **kwargs) -> _CacheEntry:
+
+    def _get_cache(self, request, expiry_delta=None, **kwargs) -> _CacheEntry:
         path = self._repository / self._cache_path / request.path / 'data.json'
+
+        if expiry_delta is None:
+            expiry_delta = self._cache_expiry_delta
+
+        if not self._read_cache:
+            return _CacheEntry(expiry_delta=expiry_delta, **kwargs)
 
         try:
             with path.open() as f:
-                return _CacheEntry.from_file(f, **kwargs)
+                return _CacheEntry.from_file(f, expiry_delta=expiry_delta, **kwargs)
         except ArtifactoryException:
-            return _CacheEntry(**kwargs)
+            return _CacheEntry(expiry_delta=expiry_delta, **kwargs)
 
     def _set_cache(self, request, cache) -> None:
+        if not self._write_cache:
+            return
+
         from . import DateTimeIsoFormatJSONEncoder
 
         path = self._repository / self._cache_path / request.path / 'data.json'
-        buffer = StringIO()
-        cache.update()
-        json.dump(cache._to_serializable_dict(), buffer, cls=DateTimeIsoFormatJSONEncoder)
-        buffer.seek(0)
-        path.deploy(buffer)
-        buffer.close()
+        with StringIO() as buffer:
+            cache.update()
+            json.dump(cache._to_serializable_dict(), buffer, cls=DateTimeIsoFormatJSONEncoder)
+            buffer.seek(0)
+            path.deploy(buffer)
 
     @contextmanager
     def proxy_download(self, request):
@@ -171,10 +183,14 @@ class ProxyUpstream:
                         # abort(Response(resp.text, resp.status_code))
 
                 else:
-                    current_app.logger.info(f"Cache miss: {request.url}")
+                    if self._read_cache:
+                        current_app.logger.info(f"Cache miss: {request.url}")
+
                     data = resp.json()
                     cache.data = data
-                    self._set_cache(request, cache)
+
+                    if self._write_cache:
+                        self._set_cache(request, cache)
         else:
             current_app.logger.info(f"Cache hit: {request.url}")
 

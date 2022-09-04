@@ -2,10 +2,30 @@
 # (c) 2022 Brian Scholer (@briantist)
 
 import logging
-from configargparse import ArgParser
+from configargparse import ArgParser, ArgumentError, Action
 from artifactory import ArtifactoryPath
 
 from . import create_app
+
+
+# TODO: when py3.8 support is dropped, switch to using argparse.BooleanOptionalAction
+class _StrBool(Action):
+    FALSES = {'false', '0', 'no'}
+    TRUES = {'true', '1', 'yes'}
+
+    def _booler(self, value):
+        if isinstance(value, bool):
+            return value
+
+        if value.lower() in self.FALSES:
+            return False
+        if value.lower() in self.TRUES:
+            return True
+
+        raise ArgumentError(self, f"Expecting 'true', 'false', 'yes', 'no', '1' or '0', but got '{value}'")
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, self._booler(values))
 
 
 if __name__ == '__main__':
@@ -37,6 +57,9 @@ if __name__ == '__main__':
     parser.add_argument('--log-body', action='store_true', env_var='GALACTORY_LOG_BODY', help='Log the body of every request (DEBUG level only).')
     parser.add_argument('--proxy-upstream', type=lambda x: str(x).rstrip('/') + '/', env_var='GALACTORY_PROXY_UPSTREAM', help='If set, then find, pull and cache results from the specified galaxy server in addition to local.')
     parser.add_argument('-npns', '--no-proxy-namespace', action='append', default=[], env_var='GALACTORY_NO_PROXY_NAMESPACE', help='Requests for this namespace should never be proxied. Can be specified multiple times.')
+    parser.add_argument('--cache-minutes', default=60, type=int, env_var='GALACTORY_CACHE_MINUTES', help='The time period that a cache entry should be considered valid.')
+    parser.add_argument('--cache-read', action=_StrBool, default=True, env_var='GALACTORY_CACHE_READ', help='Look for upsteam caches and use their values.')
+    parser.add_argument('--cache-write', action=_StrBool, default=True, env_var='GALACTORY_CACHE_WRITE', help='Populate the upstream cache in Artifactory. Should be false when no API key is provided or the key has no permission to write.')
     args = parser.parse_args()
 
     logging.basicConfig(filename=args.log_file, level=args.log_level)
@@ -51,7 +74,9 @@ if __name__ == '__main__':
         USE_GALAXY_KEY=args.use_galaxy_key,
         PREFER_CONFIGURED_KEY=args.prefer_configured_key,
         SERVER_NAME=args.server_name,
+        CACHE_MINUTES=args.cache_minutes,
+        CACHE_READ=args.cache_read,
+        CACHE_WRITE=args.cache_write,
     )
 
-    print(app.url_map)
     app.run(args.listen_addr, args.listen_port, threaded=True)
