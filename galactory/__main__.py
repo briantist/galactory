@@ -53,5 +53,4 @@ if __name__ == '__main__':
         SERVER_NAME=args.server_name,
     )
 
-    print(app.url_map)
     app.run(args.listen_addr, args.listen_port, threaded=True)
