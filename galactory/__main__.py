@@ -2,10 +2,30 @@
 # (c) 2022 Brian Scholer (@briantist)
 
 import logging
-from configargparse import ArgParser
+from configargparse import ArgParser, ArgumentError, Action
 from artifactory import ArtifactoryPath
 
 from . import create_app
+
+
+# TODO: when py3.8 support is dropped, switch to using argparse.BooleanOptionalAction
+class _StrBool(Action):
+    FALSES = {'false', '0', 'no'}
+    TRUES = {'true', '1', 'yes'}
+
+    def _booler(self, value):
+        if isinstance(value, bool):
+            return value
+
+        if value.lower() in self.FALSES:
+            return False
+        if value.lower() in self.TRUES:
+            return True
+
+        raise ArgumentError(self, f"Expecting 'true', 'false', 'yes', 'no', '1' or '0', but got '{value}'")
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, self._booler(values))
 
 
 if __name__ == '__main__':
