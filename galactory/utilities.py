@@ -6,9 +6,7 @@ import semver
 import math
 import hashlib
 
-from collections import namedtuple
 from tempfile import SpooledTemporaryFile
-from contextlib import contextmanager
 from urllib.request import urlopen
 from urllib3 import Retry
 from requests.adapters import HTTPAdapter
@@ -188,11 +186,23 @@ def lcm(a, b, *more):
     return abs(a * z) // math.gcd(a, z)
 
 
-HashedTempFile = namedtuple('HashedTempFile', ('handle', 'md5', 'sha1', 'sha256'))
+class HashedTempFile():
+    def __init__(self, handle, md5, sha1, sha256, close=True) -> None:
+        self.handle = handle
+        self.md5 = md5
+        self.sha1 = sha1
+        self.sha256 = sha256
+        self._close = close
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        if self._close:
+            self.handle.close()
 
 
-@contextmanager
-def _chunk_to_temp(fsrc, iterator=None, spool_size=5*1024*1024, seek_to_zero=True, chunk_multiplier=64) -> HashedTempFile:
+def _chunk_to_temp(fsrc, iterator=None, spool_size=5*1024*1024, seek_to_zero=True, chunk_multiplier=64, close=True) -> HashedTempFile:
     md5sum = hashlib.md5()
     sha1sum = hashlib.sha1()
     sha256sum = hashlib.sha256()
@@ -201,14 +211,15 @@ def _chunk_to_temp(fsrc, iterator=None, spool_size=5*1024*1024, seek_to_zero=Tru
 
     it = iter(lambda: fsrc.read(chunk_size), b'') if iterator is None else iterator(chunk_size)
 
-    with SpooledTemporaryFile(max_size=spool_size) as tmp:
-        for chunk in it:
-            md5sum.update(chunk)
-            sha1sum.update(chunk)
-            sha256sum.update(chunk)
-            tmp.write(chunk)
+    tmp = SpooledTemporaryFile(max_size=spool_size)
 
-        if seek_to_zero:
-            tmp.seek(0)
+    for chunk in it:
+        md5sum.update(chunk)
+        sha1sum.update(chunk)
+        sha256sum.update(chunk)
+        tmp.write(chunk)
 
-        yield HashedTempFile(tmp, md5sum.hexdigest(), sha1sum.hexdigest(),  sha256sum.hexdigest())
+    if seek_to_zero:
+        tmp.seek(0)
+
+    return HashedTempFile(tmp, md5sum.hexdigest(), sha1sum.hexdigest(),  sha256sum.hexdigest(), close=close)
