@@ -130,12 +130,11 @@ class ProxyUpstream:
         from . import DateTimeIsoFormatJSONEncoder
 
         path = self._repository / self._cache_path / request.path / 'data.json'
-        buffer = StringIO()
-        cache.update()
-        json.dump(cache._to_serializable_dict(), buffer, cls=DateTimeIsoFormatJSONEncoder)
-        buffer.seek(0)
-        path.deploy(buffer)
-        buffer.close()
+        with StringIO() as buffer:
+            cache.update()
+            json.dump(cache._to_serializable_dict(), buffer, cls=DateTimeIsoFormatJSONEncoder)
+            buffer.seek(0)
+            path.deploy(buffer)
 
     @contextmanager
     def proxy_download(self, request):
