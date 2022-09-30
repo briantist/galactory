@@ -5,6 +5,7 @@ import json
 import semver
 import math
 import hashlib
+import tarfile
 
 from tempfile import SpooledTemporaryFile
 from urllib.request import urlopen
@@ -52,9 +53,15 @@ def authorize(request, artifactory_path, retry=None) -> ArtifactoryPath:
 # adding the important part (collection_info) as its own
 # property, so all read operations will be able to get it
 # that way in the future.
-def load_manifest_from_artifactory(artifact):
-    with urlopen(str(artifact) + '!/MANIFEST.json') as u:
-        manifest = json.load(u)
+def load_manifest_from_artifactory(artifact, file=None):
+    if file:
+       file.seek(0)
+       with tarfile.open(fileobj=file, mode='r:gz') as file_tar:
+          with file_tar.extractfile('MANIFEST.json') as u:
+             manifest = json.load(u)
+    else:
+        with urlopen(str(artifact) + '!/MANIFEST.json') as u:
+            manifest = json.load(u)
     return manifest
 
 

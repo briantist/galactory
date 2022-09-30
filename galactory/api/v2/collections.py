@@ -177,7 +177,7 @@ def publish():
             current_app.logger.debug(cause)
             abort(Response(cause.response.text, cause.response.status_code))
         else:
-            manifest = load_manifest_from_artifactory(target)
+            manifest = load_manifest_from_artifactory(target, tmp.handle)
             ci = manifest['collection_info']
             props = {
                 'collection_info': json.dumps(ci),
