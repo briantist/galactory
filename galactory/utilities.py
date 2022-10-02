@@ -13,10 +13,11 @@ from urllib3 import Retry
 from requests.adapters import HTTPAdapter
 from requests import Session
 
-from flask import url_for, request, current_app
-from artifactory import ArtifactoryPath
+from flask import url_for, request, current_app, abort, Response
+from artifactory import ArtifactoryPath, ArtifactoryException
 from dohq_artifactory.auth import XJFrogArtApiAuth
 
+from . import constants as C
 from .iter_tar import iter_tar
 
 
@@ -57,7 +58,6 @@ def load_manifest_from_archive(handle, seek_to_zero_after=True):
                 if seek_to_zero_after:
                     handle.seek(0)
                 return data
-
 
 
 def discover_collections(repo, namespace=None, name=None, version=None, fast_detection=True):
@@ -226,3 +226,38 @@ def _chunk_to_temp(fsrc, iterator=None, spool_size=5*1024*1024, seek_to_zero=Tru
         tmp.seek(0)
 
     return HashedTempFile(tmp, md5sum.hexdigest(), sha1sum.hexdigest(),  sha256sum.hexdigest(), close=close)
+
+
+def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile, return_stat=False):
+    stat = None
+
+    try:
+        manifest = load_manifest_from_archive(tmpfile.handle)
+    except Exception:
+        abort(Response("Error loading manifest from collection archive.", C.HTTP_INTERNAL_SERVER_ERROR))
+    else:
+        tmpfile.handle.seek(0)
+        ci = manifest['collection_info']
+        props = {
+            'collection_info': json.dumps(ci),
+            'namespace': ci['namespace'],
+            'name': ci['name'],
+            'version': ci['version'],
+            'fqcn': f"{ci['namespace']}.{ci['name']}"
+        }
+
+    try:
+        artifact.deploy(tmpfile.handle, md5=tmpfile.md5, sha1=tmpfile.sha1, sha256=tmpfile.sha256)  # parameters=props
+        # we can't use parameters=props here because Artifactory rejects quote characters
+        # in their matrix params, and that's not compatible with collection_info because
+        # it's JSON, so we'll still have to set the properties as a separate request :(
+    except ArtifactoryException as exc:
+        cause = exc.__cause__
+        current_app.logger.debug(cause)
+        abort(Response(cause.response.text, cause.response.status_code))
+    else:
+        artifact.properties = props
+        if return_stat:
+            stat = artifact.stat()
+
+    return (artifact, props, stat)
