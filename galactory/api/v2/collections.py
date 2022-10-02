@@ -13,7 +13,7 @@ from ...utilities import (
     discover_collections,
     collected_collections,
     _collection_listing,
-    load_manifest_from_artifactory,
+    load_manifest_from_archive,
     authorize,
     _chunk_to_temp,
 )
@@ -171,13 +171,12 @@ def publish():
             abort(Response(f"Hash mismatch: uploaded=='{sha256}', calculated=='{tmp.sha256}'", C.HTTP_INTERNAL_SERVER_ERROR))
 
         try:
-            target.deploy(tmp.handle, tmp.md5, tmp.sha1, sha256)
-        except ArtifactoryException as exc:
-            cause = exc.__cause__
-            current_app.logger.debug(cause)
-            abort(Response(cause.response.text, cause.response.status_code))
+            manifest = load_manifest_from_archive(tmp.handle)
+        except Exception as e:
+            msg = f"Error loading manifest from collection archive: '{str(e)}'"
+            current_app.logger.warning(msg)
+            abort(Response(msg, C.HTTP_INTERNAL_SERVER_ERROR))
         else:
-            manifest = load_manifest_from_artifactory(target)
             ci = manifest['collection_info']
             props = {
                 'collection_info': json.dumps(ci),
@@ -186,6 +185,17 @@ def publish():
                 'version': ci['version'],
                 'fqcn': f"{ci['namespace']}.{ci['name']}"
             }
+
+        try:
+            target.deploy(tmp.handle, tmp.md5, tmp.sha1, sha256)  # parameters=props
+            # we can't use parameters=props here because Artifactory rejects quote characters
+            # in their matrix params, and that's not compatible with collection_info because
+            # it's JSON, so we'll still have to set the properties as a separate request :(
+        except ArtifactoryException as exc:
+            cause = exc.__cause__
+            current_app.logger.debug(cause)
+            abort(Response(cause.response.text, cause.response.status_code))
+        else:
             target.properties = props
 
     return jsonify(task=url_for('api.v2.import_singleton', _external=True))
