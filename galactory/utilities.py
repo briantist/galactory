@@ -5,6 +5,7 @@ import json
 import semver
 import math
 import hashlib
+import gzip
 
 from tempfile import SpooledTemporaryFile
 from urllib.request import urlopen
@@ -15,6 +16,8 @@ from requests import Session
 from flask import url_for, request, current_app
 from artifactory import ArtifactoryPath
 from dohq_artifactory.auth import XJFrogArtApiAuth
+
+from .iter_tar import iter_tar
 
 
 def _session_with_retries(retry=None, auth=None) -> Session:
@@ -46,16 +49,15 @@ def authorize(request, artifactory_path, retry=None) -> ArtifactoryPath:
     return ArtifactoryPath(artifactory_path, session=session)
 
 
-# TODO: this relies on a paid feature
-# We can work around it by parsing the archives as we upload,
-# and extracting the manifest at that time. We're already now
-# adding the important part (collection_info) as its own
-# property, so all read operations will be able to get it
-# that way in the future.
-def load_manifest_from_artifactory(artifact):
-    with urlopen(str(artifact) + '!/MANIFEST.json') as u:
-        manifest = json.load(u)
-    return manifest
+def load_manifest_from_archive(handle, seek_to_zero_after=True):
+    with gzip.GzipFile(fileobj=handle, mode='rb') as gz:
+        for fname, data in iter_tar(gz):
+            if fname.lower() in ('manifest.json', './manifest.json'):
+                data = json.loads(data)
+                if seek_to_zero_after:
+                    handle.seek(0)
+                return data
+
 
 
 def discover_collections(repo, namespace=None, name=None, version=None, fast_detection=True):
@@ -89,9 +91,10 @@ def discover_collections(repo, namespace=None, name=None, version=None, fast_det
         if 'collection_info' in props:
             collection_info = json.loads(props['collection_info'][0])
         else:
+            raise ValueError
             # fallback for now just in case, we expect this never to be hit
             # TODO: remove in the next version
-            collection_info = load_manifest_from_artifactory(p)['collection_info']
+            # collection_info = load_manifest_from_artifactory(p)['collection_info']
 
         coldata = {
             'collection_info': collection_info,
