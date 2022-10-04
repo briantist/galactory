@@ -1,0 +1,8 @@
+ancestor: null
+releases:
+  0.1.0:
+    changes:
+      release_summary: The first release of Galactory, with support for upstream proxying.
+    fragments:
+    - 0.1.0.yml
+    release_date: '2022-06-19'
