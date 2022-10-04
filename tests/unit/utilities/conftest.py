@@ -14,7 +14,7 @@ def manifest_loader():
 
     loader = mock.Mock(wraps=_load)
 
-    with mock.patch('galactory.utilities.load_manifest_from_artifactory', loader):
+    with mock.patch('galactory.utilities.load_manifest_from_archive', loader):
         yield loader
 
 
