@@ -6,3 +6,13 @@ releases:
     fragments:
     - 0.1.0.yml
     release_date: '2022-06-19'
+  0.2.0:
+    changes:
+      minor_changes:
+      - Allow server name to be configurable via the ``--server-name`` CLI option
+        (https://github.com/briantist/galactory/pull/3).
+      release_summary: Adds a new option to control the server name in generated links.
+    fragments:
+    - 0.2.0.yml
+    - 3-configurable-server-name.yml
+    release_date: '2022-06-20'
