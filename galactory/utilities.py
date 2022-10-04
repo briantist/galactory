@@ -85,16 +85,10 @@ def discover_collections(repo, namespace=None, name=None, version=None, fast_det
             continue
 
         props = p.properties
-        if not props.get('version'): # TODO: change to collection_info
+        if not props.get('collection_info'):
             continue
 
-        if 'collection_info' in props:
-            collection_info = json.loads(props['collection_info'][0])
-        else:
-            raise ValueError
-            # fallback for now just in case, we expect this never to be hit
-            # TODO: remove in the next version
-            # collection_info = load_manifest_from_artifactory(p)['collection_info']
+        collection_info = json.loads(props['collection_info'][0])
 
         coldata = {
             'collection_info': collection_info,
@@ -111,7 +105,6 @@ def discover_collections(repo, namespace=None, name=None, version=None, fast_det
                 filename=p.name,
                 _external=True,
             ),
-            # 'download_url': str(p),
             'mime_type': info.mime_type,
             'version': props['version'][0],
             'semver': semver.VersionInfo.parse(props['version'][0]),
