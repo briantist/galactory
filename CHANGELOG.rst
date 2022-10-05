@@ -5,6 +5,21 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.3.1
+======
+
+Release Summary
+---------------
+
+ARM64 containers are now part of the release process. The meaning of the ``latest`` tag for containers now refers to the build from the latest *git tag* rather than the latest commit.
+Containers are now also tagged with the branch name to correspond to the latest commit in a specific branch, for example ``ghcr.io/briantist/galactory:main``.
+There are no functional changes in this release.
+
+Minor Changes
+-------------
+
+- container releases - change meaning of container tags, add ARM64 container releases (https://github.com/briantist/galactory/pull/10, https://github.com/briantist/galactory/pull/11).
+
 v0.3.0
 ======
 
