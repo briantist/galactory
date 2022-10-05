@@ -5,6 +5,19 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.5.0
+======
+
+Release Summary
+---------------
+
+This release contains cache control options. This enables more scenarios for proxying, such as proxying with no Artifactory API key, or one without write permission. The cache expiry time can now be configured, and it can be set independently in different galactory instances pointed at the same cache in artifactory.
+
+Minor Changes
+-------------
+
+- proxy cache - finer control over when and what gets cached when proxying upstream, allowing for proxy configurations with less permission in artifactory (https://github.com/briantist/galactory/issues/4, https://github.com/briantist/galactory/pull/13).
+
 v0.4.0
 ======
 

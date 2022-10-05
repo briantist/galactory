@@ -57,3 +57,18 @@ releases:
     - 0.4.0.yml
     - 12-config.yml
     release_date: '2022-09-02'
+  0.5.0:
+    changes:
+      minor_changes:
+      - proxy cache - finer control over when and what gets cached when proxying upstream,
+        allowing for proxy configurations with less permission in artifactory (https://github.com/briantist/galactory/issues/4,
+        https://github.com/briantist/galactory/pull/13).
+      release_summary: This release contains cache control options. This enables more
+        scenarios for proxying, such as proxying with no Artifactory API key, or one
+        without write permission. The cache expiry time can now be configured, and
+        it can be set independently in different galactory instances pointed at the
+        same cache in artifactory.
+    fragments:
+    - 0.5.0.yml
+    - 13-cache-control.yml
+    release_date: '2022-09-04'
