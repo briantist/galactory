@@ -229,7 +229,6 @@ def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: H
     except Exception:
         abort(Response("Error loading manifest from collection archive.", C.HTTP_INTERNAL_SERVER_ERROR))
     else:
-        tmpfile.handle.seek(0)
         ci = manifest['collection_info']
         props = {
             'collection_info': json.dumps(ci),
