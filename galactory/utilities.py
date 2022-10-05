@@ -5,6 +5,9 @@ import json
 import semver
 import math
 import hashlib
+import gzip
+
+from typing import Dict, Any
 
 from tempfile import SpooledTemporaryFile
 from urllib.request import urlopen
@@ -12,9 +15,12 @@ from urllib3 import Retry
 from requests.adapters import HTTPAdapter
 from requests import Session
 
-from flask import url_for, request, current_app
-from artifactory import ArtifactoryPath
+from flask import url_for, request, current_app, abort, Response
+from artifactory import ArtifactoryPath, ArtifactoryException
 from dohq_artifactory.auth import XJFrogArtApiAuth
+
+from . import constants as C
+from .iter_tar import iter_tar
 
 
 def _session_with_retries(retry=None, auth=None) -> Session:
@@ -46,16 +52,14 @@ def authorize(request, artifactory_path, retry=None) -> ArtifactoryPath:
     return ArtifactoryPath(artifactory_path, session=session)
 
 
-# TODO: this relies on a paid feature
-# We can work around it by parsing the archives as we upload,
-# and extracting the manifest at that time. We're already now
-# adding the important part (collection_info) as its own
-# property, so all read operations will be able to get it
-# that way in the future.
-def load_manifest_from_artifactory(artifact):
-    with urlopen(str(artifact) + '!/MANIFEST.json') as u:
-        manifest = json.load(u)
-    return manifest
+def load_manifest_from_archive(handle, seek_to_zero_after=True):
+    with gzip.GzipFile(fileobj=handle, mode='rb') as gz:
+        for fname, data in iter_tar(gz):
+            if fname.lower() in ('manifest.json', './manifest.json'):
+                data = json.loads(data)
+                if seek_to_zero_after:
+                    handle.seek(0)
+                return data
 
 
 def discover_collections(repo, namespace=None, name=None, version=None, fast_detection=True):
@@ -83,15 +87,10 @@ def discover_collections(repo, namespace=None, name=None, version=None, fast_det
             continue
 
         props = p.properties
-        if not props.get('version'): # TODO: change to collection_info
+        if not props.get('collection_info'):
             continue
 
-        if 'collection_info' in props:
-            collection_info = json.loads(props['collection_info'][0])
-        else:
-            # fallback for now just in case, we expect this never to be hit
-            # TODO: remove in the next version
-            collection_info = load_manifest_from_artifactory(p)['collection_info']
+        collection_info = json.loads(props['collection_info'][0])
 
         coldata = {
             'collection_info': collection_info,
@@ -108,7 +107,6 @@ def discover_collections(repo, namespace=None, name=None, version=None, fast_det
                 filename=p.name,
                 _external=True,
             ),
-            # 'download_url': str(p),
             'mime_type': info.mime_type,
             'version': props['version'][0],
             'semver': semver.VersionInfo.parse(props['version'][0]),
@@ -223,3 +221,33 @@ def _chunk_to_temp(fsrc, iterator=None, spool_size=5*1024*1024, seek_to_zero=Tru
         tmp.seek(0)
 
     return HashedTempFile(tmp, md5sum.hexdigest(), sha1sum.hexdigest(),  sha256sum.hexdigest(), close=close)
+
+
+def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile) -> Dict[str, Any]:
+    try:
+        manifest = load_manifest_from_archive(tmpfile.handle)
+    except Exception:
+        abort(Response("Error loading manifest from collection archive.", C.HTTP_INTERNAL_SERVER_ERROR))
+    else:
+        ci = manifest['collection_info']
+        props = {
+            'collection_info': json.dumps(ci),
+            'namespace': ci['namespace'],
+            'name': ci['name'],
+            'version': ci['version'],
+            'fqcn': f"{ci['namespace']}.{ci['name']}"
+        }
+
+    try:
+        artifact.deploy(tmpfile.handle, md5=tmpfile.md5, sha1=tmpfile.sha1, sha256=tmpfile.sha256)  # parameters=props
+        # we can't use parameters=props here because Artifactory rejects quote characters
+        # in their matrix params, and that's not compatible with collection_info because
+        # it's JSON, so we'll still have to set the properties as a separate request :(
+    except ArtifactoryException as exc:
+        cause = exc.__cause__
+        current_app.logger.debug(cause)
+        abort(Response(cause.response.text, cause.response.status_code))
+    else:
+        artifact.properties = props
+
+    return props

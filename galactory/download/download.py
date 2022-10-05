@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Brian Scholer (@briantist)
 
-import json
-
-from flask import abort, request, current_app, send_file, Response
-from artifactory import ArtifactoryException
+from flask import abort, request, current_app, send_file
 
 from . import bp as dl
 from .. import constants as C
-from ..utilities import load_manifest_from_artifactory, authorize, _chunk_to_temp
+from ..utilities import authorize, _chunk_to_temp, upload_collection_from_hashed_tempfile
 from ..upstream import ProxyUpstream
 
 
@@ -37,23 +34,8 @@ def download(filename):
             if not cache_write:
                 return send_file(tmp.handle, as_attachment=True, download_name=filename, etag=False)
 
-            try:
-                artifact.deploy(tmp.handle, md5=tmp.md5, sha1=tmp.sha1, sha256=tmp.sha256)
-            except ArtifactoryException as exc:
-                cause = exc.__cause__
-                current_app.logger.debug(cause)
-                abort(Response(cause.response.text, cause.response.status_code))
-            else:
-                manifest = load_manifest_from_artifactory(artifact)
-                ci = manifest['collection_info']
-                props = {
-                    'collection_info': json.dumps(ci),
-                    'namespace': ci['namespace'],
-                    'name': ci['name'],
-                    'version': ci['version'],
-                    'fqcn': f"{ci['namespace']}.{ci['name']}"
-                }
-                artifact.properties = props
-                stat = artifact.stat()
+            upload_collection_from_hashed_tempfile(artifact, tmp)
+
+        stat = artifact.stat()
 
     return send_file(artifact.open(), as_attachment=True, download_name=artifact.name, last_modified=stat.mtime, etag=False)
