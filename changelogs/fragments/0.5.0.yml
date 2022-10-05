@@ -1,0 +1,3 @@
+---
+release_summary: |-
+  This release contains cache control options. This enables more scenarios for proxying, such as proxying with no Artifactory API key, or one without write permission. The cache expiry time can now be configured, and it can be set independently in different galactory instances pointed at the same cache in artifactory.

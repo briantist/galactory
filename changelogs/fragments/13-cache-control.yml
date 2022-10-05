@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - proxy cache - finer control over when and what gets cached when proxying upstream, allowing for proxy configurations with less permission in artifactory (https://github.com/briantist/galactory/issues/4, https://github.com/briantist/galactory/pull/13).
