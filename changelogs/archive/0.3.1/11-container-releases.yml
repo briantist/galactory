@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - container releases - change meaning of container tags, add ARM64 container releases (https://github.com/briantist/galactory/pull/10, https://github.com/briantist/galactory/pull/11).

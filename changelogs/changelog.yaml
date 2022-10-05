@@ -1,0 +1,74 @@
+ancestor: null
+releases:
+  0.1.0:
+    changes:
+      release_summary: The first release of Galactory, with support for upstream proxying.
+    fragments:
+    - 0.1.0.yml
+    release_date: '2022-06-19'
+  0.2.0:
+    changes:
+      minor_changes:
+      - Allow server name to be configurable via the ``--server-name`` CLI option
+        (https://github.com/briantist/galactory/pull/3).
+      release_summary: Adds a new option to control the server name in generated links.
+    fragments:
+    - 0.2.0.yml
+    - 3-configurable-server-name.yml
+    release_date: '2022-06-20'
+  0.3.0:
+    changes:
+      minor_changes:
+      - connections - retries are now done automatically both on proxied upstream
+        requests and on requests to Artifactory (https://github.com/briantist/galactory/pull/7,
+        https://github.com/briantist/galactory/pull/8).
+      - performance - optimizations when iterating collections allow a huge reduction
+        in the number of requests to artifactory needed (https://github.com/briantist/galactory/pull/9).
+      release_summary: Some big reliability and performance enhancements included
+        in ths release.
+    fragments:
+    - 0.3.0.yml
+    - 9-performance-and-retries.yml
+    release_date: '2022-08-08'
+  0.3.1:
+    changes:
+      minor_changes:
+      - container releases - change meaning of container tags, add ARM64 container
+        releases (https://github.com/briantist/galactory/pull/10, https://github.com/briantist/galactory/pull/11).
+      release_summary: 'ARM64 containers are now part of the release process. The
+        meaning of the ``latest`` tag for containers now refers to the build from
+        the latest *git tag* rather than the latest commit.
+
+        Containers are now also tagged with the branch name to correspond to the latest
+        commit in a specific branch, for example ``ghcr.io/briantist/galactory:main``.
+
+        There are no functional changes in this release.'
+    fragments:
+    - 0.3.1.yml
+    - 11-container-releases.yml
+    release_date: '2022-09-02'
+  0.4.0:
+    changes:
+      minor_changes:
+      - configuration - all options can now be configured via environment variables,
+        direct in CLI, or in config files (https://github.com/briantist/galactory/pull/12).
+      release_summary: This release adds much improved configuration support.
+    fragments:
+    - 0.4.0.yml
+    - 12-config.yml
+    release_date: '2022-09-02'
+  0.5.0:
+    changes:
+      minor_changes:
+      - proxy cache - finer control over when and what gets cached when proxying upstream,
+        allowing for proxy configurations with less permission in artifactory (https://github.com/briantist/galactory/issues/4,
+        https://github.com/briantist/galactory/pull/13).
+      release_summary: This release contains cache control options. This enables more
+        scenarios for proxying, such as proxying with no Artifactory API key, or one
+        without write permission. The cache expiry time can now be configured, and
+        it can be set independently in different galactory instances pointed at the
+        same cache in artifactory.
+    fragments:
+    - 0.5.0.yml
+    - 13-cache-control.yml
+    release_date: '2022-09-04'

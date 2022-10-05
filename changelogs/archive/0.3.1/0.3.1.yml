@@ -1,0 +1,5 @@
+---
+release_summary: |-
+  ARM64 containers are now part of the release process. The meaning of the ``latest`` tag for containers now refers to the build from the latest *git tag* rather than the latest commit.
+  Containers are now also tagged with the branch name to correspond to the latest commit in a specific branch, for example ``ghcr.io/briantist/galactory:main``.
+  There are no functional changes in this release.

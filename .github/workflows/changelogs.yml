@@ -1,0 +1,23 @@
+---
+name: Changelogs
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Requirements
+        run: pip install antsibull-changelog
+
+      - name: Lint Changelogs
+        run: antsibull-changelog lint
