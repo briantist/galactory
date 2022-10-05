@@ -35,6 +35,7 @@ def download(filename):
                 return send_file(tmp.handle, as_attachment=True, download_name=filename, etag=False)
 
             upload_collection_from_hashed_tempfile(artifact, tmp)
-            stat = artifact.stat()
+
+        stat = artifact.stat()
 
     return send_file(artifact.open(), as_attachment=True, download_name=artifact.name, last_modified=stat.mtime, etag=False)
