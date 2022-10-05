@@ -7,7 +7,7 @@ import math
 import hashlib
 import gzip
 
-from typing import Any
+from typing import Dict, Any
 
 from tempfile import SpooledTemporaryFile
 from urllib.request import urlopen
@@ -223,7 +223,7 @@ def _chunk_to_temp(fsrc, iterator=None, spool_size=5*1024*1024, seek_to_zero=Tru
     return HashedTempFile(tmp, md5sum.hexdigest(), sha1sum.hexdigest(),  sha256sum.hexdigest(), close=close)
 
 
-def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile) -> dict[str, Any]:
+def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile) -> Dict[str, Any]:
     stat = None
 
     try:
