@@ -224,8 +224,6 @@ def _chunk_to_temp(fsrc, iterator=None, spool_size=5*1024*1024, seek_to_zero=Tru
 
 
 def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile) -> Dict[str, Any]:
-    stat = None
-
     try:
         manifest = load_manifest_from_archive(tmpfile.handle)
     except Exception:
