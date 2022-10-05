@@ -7,6 +7,8 @@ import math
 import hashlib
 import gzip
 
+from typing import Any
+
 from tempfile import SpooledTemporaryFile
 from urllib.request import urlopen
 from urllib3 import Retry
@@ -221,7 +223,7 @@ def _chunk_to_temp(fsrc, iterator=None, spool_size=5*1024*1024, seek_to_zero=Tru
     return HashedTempFile(tmp, md5sum.hexdigest(), sha1sum.hexdigest(),  sha256sum.hexdigest(), close=close)
 
 
-def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile, return_stat=False):
+def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile) -> dict[str, Any]:
     stat = None
 
     try:
@@ -249,7 +251,5 @@ def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: H
         abort(Response(cause.response.text, cause.response.status_code))
     else:
         artifact.properties = props
-        if return_stat:
-            stat = artifact.stat()
 
-    return (artifact, props, stat)
+    return props

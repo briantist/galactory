@@ -34,6 +34,7 @@ def download(filename):
             if not cache_write:
                 return send_file(tmp.handle, as_attachment=True, download_name=filename, etag=False)
 
-            _, _, stat = upload_collection_from_hashed_tempfile(artifact, tmp, return_stat=True)
+            upload_collection_from_hashed_tempfile(artifact, tmp, return_stat=True)
+            stat = artifact.stat()
 
     return send_file(artifact.open(), as_attachment=True, download_name=artifact.name, last_modified=stat.mtime, etag=False)
