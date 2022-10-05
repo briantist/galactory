@@ -5,6 +5,19 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.4.0
+======
+
+Release Summary
+---------------
+
+This release adds much improved configuration support.
+
+Minor Changes
+-------------
+
+- configuration - all options can now be configured via environment variables, direct in CLI, or in config files (https://github.com/briantist/galactory/pull/12).
+
 v0.3.1
 ======
 
