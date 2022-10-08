@@ -45,6 +45,7 @@ if __name__ == '__main__':
     parser.add_argument('--artifactory-api-key', type=str, env_var='GALACTORY_ARTIFACTORY_API_KEY', help='If set, is the API key used to access Artifactory.')
     parser.add_argument('--use-galaxy-key', action='store_true', env_var='GALACTORY_USE_GALAXY_KEY', help='If set, uses the Galaxy token as the Artifactory API key.')
     parser.add_argument('--prefer-configured-key', action='store_true', env_var='GALACTORY_PREFER_CONFIGURED_KEY', help='If set, prefer the confgured Artifactory key over the Galaxy token.')
+    parser.add_argument('--publish-skip-configured-key', action='store_true', env_var='GALACTORY_PUBLISH_SKIP_CONFIGURED_KEY', help='If set, publish endpoint will not use a configured key, only Galaxy token.')
     parser.add_argument('--log-file', type=str, env_var='GALACTORY_LOG_FILE', help='If set, logging will go to this file instead of the console.')
     parser.add_argument(
         '--log-level',
@@ -73,6 +74,7 @@ if __name__ == '__main__':
         ARTIFACTORY_API_KEY=args.artifactory_api_key,
         USE_GALAXY_KEY=args.use_galaxy_key,
         PREFER_CONFIGURED_KEY=args.prefer_configured_key,
+        PUBLISH_SKIP_CONFIGURED_KEY=args.publish_skip_configured_key,
         SERVER_NAME=args.server_name,
         CACHE_MINUTES=args.cache_minutes,
         CACHE_READ=args.cache_read,
