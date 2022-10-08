@@ -15,7 +15,7 @@ from urllib3 import Retry
 from requests.adapters import HTTPAdapter
 from requests import Session
 
-from flask import url_for, request, current_app, abort, Response
+from flask import url_for, request, current_app, abort, Response, Request
 from artifactory import ArtifactoryPath, ArtifactoryException
 from dohq_artifactory.auth import XJFrogArtApiAuth
 
@@ -36,9 +36,11 @@ def _session_with_retries(retry=None, auth=None) -> Session:
     return session
 
 
-def authorize(request, artifactory_path, retry=None) -> ArtifactoryPath:
+def authorize(request: Request, artifactory_path: ArtifactoryPath, retry=None, skip_configured_key: bool = False) -> ArtifactoryPath:
     auth = None
-    apikey = current_app.config['ARTIFACTORY_API_KEY']
+    apikey = None
+    if not skip_configured_key:
+        apikey = current_app.config['ARTIFACTORY_API_KEY']
 
     if current_app.config['USE_GALAXY_KEY'] and (not current_app.config['PREFER_CONFIGURED_KEY'] or not apikey):
         authorization = request.headers.get('Authorization')
