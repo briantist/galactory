@@ -5,6 +5,20 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.6.0
+======
+
+Release Summary
+---------------
+
+With this release we've hopefully gotten rid of the last code that requires a paid Artifactory license, so galactory should now be fully usable with Artifactory OSS. We've also added the ability to block the use of a configured API key with the publish endpoint, preventing clients from publishing anonymously.
+
+Minor Changes
+-------------
+
+- manifest loading - galactory no longer uses Artifactory's "Archive Entry Download" endpoint, removing the need to use a pro license or greater (https://github.com/briantist/galactory/issues/5, https://github.com/briantist/galactory/pull/16).
+- publish endpoint - add ``PUBLISH_SKIP_CONFIGURED_KEY`` option which disallows using a configured API key on the ``publish`` endpoint (https://github.com/briantist/galactory/issues/14).
+
 v0.5.0
 ======
 
