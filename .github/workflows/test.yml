@@ -46,6 +46,7 @@ jobs:
           VER_TAG=${GITHUB_REF/refs\/tags\/v/}
           echo "::set-output name=relver::${VER_TAG}"
           echo "::set-output name=branch::${GITHUB_REF#refs/heads/}"
+          echo "::set-output name=changelogver::v${VER_TAG//\./-}"
 
   build:
     needs: [test]
@@ -167,3 +168,5 @@ jobs:
             PyPI: https://pypi.org/project/galactory/${{ needs.test.outputs.relver }}/
             Container: `ghcr.io/${{ github.repository }}:${{ needs.test.outputs.relver }}`
             Browse container tags: https://github.com/briantist/galactory/pkgs/container/galactory
+
+            Changelog: https://github.com/briantist/galactory/blob/main/CHANGELOG.rst#${{ needs.test.outputs.changelogver }}
