@@ -28,7 +28,8 @@ usage: python -m galactory [-h] [-c CONFIG] [--listen-addr LISTEN_ADDR]
                            [--listen-port LISTEN_PORT] [--server-name SERVER_NAME]
                            --artifactory-path ARTIFACTORY_PATH
                            [--artifactory-api-key ARTIFACTORY_API_KEY] [--use-galaxy-key]
-                           [--prefer-configured-key] [--log-file LOG_FILE]
+                           [--prefer-configured-key] [--publish-skip-configured-key]
+                           [--log-file LOG_FILE]
                            [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--log-headers]
                            [--log-body] [--proxy-upstream PROXY_UPSTREAM]
                            [-npns NO_PROXY_NAMESPACE] [--cache-minutes CACHE_MINUTES]
@@ -59,6 +60,9 @@ optional arguments:
   --prefer-configured-key
                         If set, prefer the confgured Artifactory key over the Galaxy token.
                         [env var: GALACTORY_PREFER_CONFIGURED_KEY]
+ --publish-skip-configured-key
+                        If set, publish endpoint will not use a configured key, only Galaxy token.
+                        [env var: GALACTORY_PUBLISH_SKIP_CONFIGURED_KEY]
   --log-file LOG_FILE   If set, logging will go to this file instead of the console.
                         [env var: GALACTORY_LOG_FILE]
   --log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}
