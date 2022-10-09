@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    name: test [${{ matrix.type }}-py${{ matrix.python }}${{ matrix.type == 'integration' && format('-Ⓐ{0}', matrix.artifactory) || '']
+    name: test [${{ matrix.type }}-py${{ matrix.python }}${{ matrix.type == 'integration' && format('-Ⓐ{0}', matrix.artifactory) || '' }}]
     permissions:
       contents: read
     runs-on: ubuntu-latest
