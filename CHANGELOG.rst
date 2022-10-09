@@ -5,6 +5,19 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.7.0
+======
+
+Release Summary
+---------------
+
+Property setting is now done at upload time, which removes another piece of Pro license code, but may cause issues with certain reverse proxy configurations. A new fallback option is introduced to use the old behavior, but it may be removed in a future version.
+
+Breaking Changes / Porting Guide
+--------------------------------
+
+- property setting - by default properties are now set on the initial upload of a collection to Artifactory. This removes an additional roundtrip to the server, and removes another API call that requires a Pro license of Artifactory. However, some reverse proxy configurations will not work with this. A new parameter ``USE_PROPERTY_FALLBACK`` has been added which will use the old behavior of setting properties in a second request,  but this will still require a Pro license to use. This option may be removed in a future version. See (https://github.com/briantist/galactory/issues/19).
+
 v0.6.0
 ======
 

@@ -76,8 +76,8 @@ releases:
     changes:
       minor_changes:
       - manifest loading - galactory no longer uses Artifactory's "Archive Entry Download"
-        endpoint, removing one piece of code that requires a pro license or greater (https://github.com/briantist/galactory/issues/5,
-        https://github.com/briantist/galactory/pull/16).
+        endpoint, removing one piece of code that requires a pro license or greater
+        (https://github.com/briantist/galactory/issues/5, https://github.com/briantist/galactory/pull/16).
       - publish endpoint - add ``PUBLISH_SKIP_CONFIGURED_KEY`` option which disallows
         using a configured API key on the ``publish`` endpoint (https://github.com/briantist/galactory/issues/14).
       release_summary: With this release we've added the ability to block the use
@@ -88,3 +88,22 @@ releases:
     - 14-publish-skip-configured-key.yml
     - 5-manifest-destiny.yml
     release_date: '2022-10-08'
+  0.7.0:
+    changes:
+      breaking_changes:
+      - property setting - by default properties are now set on the initial upload
+        of a collection to Artifactory. This removes an additional roundtrip to the
+        server, and removes another API call that requires a Pro license of Artifactory.
+        However, some reverse proxy configurations will not work with this. A new
+        parameter ``USE_PROPERTY_FALLBACK`` has been added which will use the old
+        behavior of setting properties in a second request,  but this will still require
+        a Pro license to use. This option may be removed in a future version. See
+        (https://github.com/briantist/galactory/issues/19).
+      release_summary: Property setting is now done at upload time, which removes
+        another piece of Pro license code, but may cause issues with certain reverse
+        proxy configurations. A new fallback option is introduced to use the old behavior,
+        but it may be removed in a future version.
+    fragments:
+    - 0.7.0.yml
+    - 19-property-fallback.yml
+    release_date: '2022-10-09'

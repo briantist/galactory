@@ -1,0 +1,3 @@
+---
+release_summary: |-
+  Property setting is now done at upload time, which removes another piece of Pro license code, but may cause issues with certain reverse proxy configurations. A new fallback option is introduced to use the old behavior, but it may be removed in a future version.
