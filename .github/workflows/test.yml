@@ -26,6 +26,7 @@ jobs:
     outputs:
       relver: ${{ steps.setvars.outputs.relver }}
       branch: ${{ steps.setvars.outputs.branch }}
+      changelogver: ${{ steps.setvars.outputs.changelogver }}
     steps:
       - uses: actions/checkout@v3
 
