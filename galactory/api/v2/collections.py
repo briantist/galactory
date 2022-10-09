@@ -162,6 +162,7 @@ def publish():
     sha256 = request.form['sha256']
     file = request.files['file']
     skip_configured_key = current_app.config['PUBLISH_SKIP_CONFIGURED_KEY']
+    property_fallback = current_app.config.get('USE_PROPERTY_FALLBACK', False)
 
     target = authorize(request, current_app.config['ARTIFACTORY_PATH'] / file.filename, skip_configured_key=skip_configured_key)
 
@@ -169,6 +170,6 @@ def publish():
         if tmp.sha256 != sha256:
             abort(Response(f"Hash mismatch: uploaded=='{sha256}', calculated=='{tmp.sha256}'", C.HTTP_INTERNAL_SERVER_ERROR))
 
-        upload_collection_from_hashed_tempfile(target, tmp)
+        upload_collection_from_hashed_tempfile(target, tmp, property_fallback=property_fallback)
 
     return jsonify(task=url_for('api.v2.import_singleton', _external=True))

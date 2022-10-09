@@ -17,6 +17,7 @@ def download(filename):
     cache_minutes = current_app.config['CACHE_MINUTES']
     cache_read = current_app.config['CACHE_READ']
     cache_write = current_app.config['CACHE_WRITE']
+    property_fallback = current_app.config.get('USE_PROPERTY_FALLBACK', False)
 
     try:
         stat = artifact.stat()
@@ -34,7 +35,7 @@ def download(filename):
             if not cache_write:
                 return send_file(tmp.handle, as_attachment=True, download_name=filename, etag=False)
 
-            upload_collection_from_hashed_tempfile(artifact, tmp)
+            upload_collection_from_hashed_tempfile(artifact, tmp, property_fallback=property_fallback)
 
         stat = artifact.stat()
 
