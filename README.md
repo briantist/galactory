@@ -8,6 +8,9 @@ It can also be set up to transparently proxy an upstream Galaxy server, storing 
 # Acknowledgements
 This project is _heavily_ inspired by [amanda](https://github.com/sivel/amanda/).
 
+# Artifactory compatibility
+For the time being some features may require an Artifactory Pro license. Work is being done to workaround the (many) limitations that JFrog has placed on API calls. [These limitations have also complicated the ability to run integration tests](https://github.com/briantist/galactory/issues/6). As a result, the test of whether all Pro license dependent API calls have been rooted out, will be whether test coverage exists that can run against Artifactory OSS.
+
 # How to use
 There isn't any proper documentation yet. The help output is below.
 
@@ -87,6 +90,11 @@ optional arguments:
                         Populate the upstream cache in Artifactory. Should be false when no API key is
                         provided or the key has no permission to write.
                         [env var: GALACTORY_CACHE_WRITE]
+  --use-property-fallback
+                        Set properties of an uploaded collection in a separate request after publshinng.
+                        Requires a Pro license of Artifactory. This feature is a workaround for an
+                        Artifactory proxy configuration error and may be removed in a future version.
+                        [env var: GALACTORY_USE_PROPERTY_FALLBACK]
 
 Args that start with '--' (eg. --listen-addr) can also be set in a config file
 (/etc/galactory.d/*.conf or ~/.galactory/*.conf or specified via -c). Config file syntax allows:

@@ -225,7 +225,7 @@ def _chunk_to_temp(fsrc, iterator=None, spool_size=5*1024*1024, seek_to_zero=Tru
     return HashedTempFile(tmp, md5sum.hexdigest(), sha1sum.hexdigest(),  sha256sum.hexdigest(), close=close)
 
 
-def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile) -> Dict[str, Any]:
+def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile, property_fallback: bool = False) -> Dict[str, Any]:
     try:
         manifest = load_manifest_from_archive(tmpfile.handle)
     except Exception:
@@ -240,16 +240,18 @@ def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: H
             'fqcn': f"{ci['namespace']}.{ci['name']}"
         }
 
+    params = props
+    if property_fallback:
+        params = {}
+
     try:
-        artifact.deploy(tmpfile.handle, md5=tmpfile.md5, sha1=tmpfile.sha1, sha256=tmpfile.sha256)  # parameters=props
-        # we can't use parameters=props here because Artifactory rejects quote characters
-        # in their matrix params, and that's not compatible with collection_info because
-        # it's JSON, so we'll still have to set the properties as a separate request :(
+        artifact.deploy(tmpfile.handle, md5=tmpfile.md5, sha1=tmpfile.sha1, sha256=tmpfile.sha256, parameters=params)
     except ArtifactoryException as exc:
         cause = exc.__cause__
         current_app.logger.debug(cause)
         abort(Response(cause.response.text, cause.response.status_code))
     else:
-        artifact.properties = props
+        if property_fallback:
+            artifact.properties = props
 
     return props
