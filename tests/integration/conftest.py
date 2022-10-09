@@ -22,6 +22,9 @@ def app(repository, artifactory_user):
     app.config.update({
         'ARTIFACTORY_PATH': repository,
         'ARTIFACTORY_API_KEY': artifactory_user.api_key.get(),
+        'PUBLISH_SKIP_CONFIGURED_KEY': False,
+        'USE_GALAXY_KEY': True,
+        'PREFER_CONFIGURED_KEY': True,
     })
     yield app
 
@@ -107,4 +110,5 @@ def artifactory_generic_repository(artifactory_authed):
 
 @pytest.fixture
 def repository(artifactory_generic_repository):
-    return artifactory_generic_repository.path / 'repo' / 'subpath'
+    # https://github.com/devopshq/artifactory/issues/386
+    return ArtifactoryPath(str(artifactory_generic_repository.path)) / 'repo' / 'subpath'
