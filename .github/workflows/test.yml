@@ -52,7 +52,7 @@ jobs:
       - name: Pull
         if: matrix.type == 'integration'
         working-directory: tests/artifactory
-        run: docker-compose pull
+        run: docker compose pull
 
       - name: Pytest
         run: pytest tests/${{ matrix.type }}
