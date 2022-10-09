@@ -1,3 +1,3 @@
 ---
 minor_changes:
-  - manifest loading - galactory no longer uses Artifactory's "Archive Entry Download" endpoint, removing the need to use a pro license or greater (https://github.com/briantist/galactory/issues/5, https://github.com/briantist/galactory/pull/16).
+  - manifest loading - galactory no longer uses Artifactory's "Archive Entry Download" endpoint, removing one piece of code that requires a pro license or greater (https://github.com/briantist/galactory/issues/5, https://github.com/briantist/galactory/pull/16).
