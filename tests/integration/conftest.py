@@ -93,6 +93,7 @@ def artifactory_generic_repository(artifactory_authed):
     name = 'example-repo-local'
     # repo = artifactory_authed.find_repository_local(name)
     # ^ can't use this, requires pro license 🙄
+    # https://github.com/devopshq/artifactory/issues/356
 
     for repo in artifactory_authed.get_repositories():
         if repo.name == name:
