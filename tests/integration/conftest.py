@@ -4,13 +4,55 @@ from urllib.parse import urljoin
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 
+from pathlib import Path
 from artifactory import ArtifactoryPath, RepositoryLocal
 from dohq_artifactory import User
 
+import ansible_runner
 
-@pytest.fixture(autouse=True, scope='session')
-def broken():
-    pytest.skip('Integration tests are incomplete and disabled.')
+from galactory import create_app
+
+# @pytest.fixture(autouse=True, scope='session')
+# def broken():
+#     pytest.skip('Integration tests are incomplete and disabled.')
+
+@pytest.fixture
+def app(repository, artifactory_user):
+    app = create_app()
+    app.config.update({
+        'ARTIFACTORY_PATH': repository,
+        'ARTIFACTORY_API_KEY': artifactory_user.api_key.get(),
+        'PUBLISH_SKIP_CONFIGURED_KEY': False,
+        'USE_GALAXY_KEY': True,
+        'PREFER_CONFIGURED_KEY': True,
+    })
+    yield app
+
+
+@pytest.fixture
+def app_request_context(app):
+    with app.app_context(), app.test_request_context():
+        yield
+
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+
+@pytest.fixture(scope="session")
+def test_collections(collection_finder, data_finder):
+    collections = Path(collection_finder())
+    runtime = Path(data_finder('runtime'))
+    for collection in collections.iterdir():
+        for version in collection.iterdir():
+            out, err, rc = ansible_runner.run_command(
+                executable_cmd='ansible-galaxy',
+                cmdline_args=['collection', 'build', '--force', '--output-path', str(runtime.absolute()), str(version.absolute())]
+            )
+            assert rc == 0 , f"stdout: {out}\nstderr: {err}"
+
+    return [d for d in runtime.rglob('*.tar.gz')]
 
 
 @pytest.fixture(scope='session')
@@ -51,6 +93,7 @@ def artifactory_generic_repository(artifactory_authed):
     name = 'example-repo-local'
     # repo = artifactory_authed.find_repository_local(name)
     # ^ can't use this, requires pro license 🙄
+    # https://github.com/devopshq/artifactory/issues/356
 
     for repo in artifactory_authed.get_repositories():
         if repo.name == name:
@@ -67,5 +110,6 @@ def artifactory_generic_repository(artifactory_authed):
 
 
 @pytest.fixture
-def repository(artifactory):
-    return ArtifactoryPath(f"{artifactory}/repo/subpath")
+def repository(artifactory_generic_repository):
+    # https://github.com/devopshq/artifactory/issues/386
+    return ArtifactoryPath(str(artifactory_generic_repository.path)) / 'repo' / 'subpath'

@@ -10,19 +10,30 @@ on:
 
 jobs:
   test:
+    name: test [${{ matrix.type }}-py${{ matrix.python }}${{ matrix.type == 'integration' && format('-Ⓐ{0}', matrix.artifactory) || '' }}]
     permissions:
       contents: read
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        type:
+          - unit
+          - integration
+        artifactory:
+          - latest
+          - 6.23.42
         python:
           - '3.8'
           - '3.9'
           # - '3.10'  # tests totally broken.. mocks don't seem to work
           # - '3.11-dev'  # test broken:  AttributeError: module 'pathlib' has no attribute '_Accessor'
+        exclude:
+          - type: unit
+            artifactory: latest
     env:
       PYTEST_ADDOPTS: '--color=yes'
+      GALACTORY_TEST_ARTIFACTORY_TAG: ${{ matrix.artifactory }}
     outputs:
       relver: ${{ steps.setvars.outputs.relver }}
       branch: ${{ steps.setvars.outputs.branch }}
@@ -38,8 +49,13 @@ jobs:
         working-directory: tests
         run: pip install -r requirements.txt
 
+      - name: Pull
+        if: matrix.type == 'integration'
+        working-directory: tests/artifactory
+        run: docker compose pull
+
       - name: Pytest
-        run: pytest tests/
+        run: pytest tests/${{ matrix.type }}
 
       - name: Set vars
         id: setvars
