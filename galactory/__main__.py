@@ -61,6 +61,7 @@ if __name__ == '__main__':
     parser.add_argument('--cache-minutes', default=60, type=int, env_var='GALACTORY_CACHE_MINUTES', help='The time period that a cache entry should be considered valid.')
     parser.add_argument('--cache-read', action=_StrBool, default=True, env_var='GALACTORY_CACHE_READ', help='Look for upsteam caches and use their values.')
     parser.add_argument('--cache-write', action=_StrBool, default=True, env_var='GALACTORY_CACHE_WRITE', help='Populate the upstream cache in Artifactory. Should be false when no API key is provided or the key has no permission to write.')
+    parser.add_argument('--use-property-fallback', action='store_true', env_var='GALACTORY_USE_PROPERTY_FALLBACK', help='Set properties of an uploaded collection in a separate request after publshinng. Requires a Pro license of Artifactory. This feature is a workaround for an Artifactory proxy configuration error and may be removed in a future version.')
     args = parser.parse_args()
 
     logging.basicConfig(filename=args.log_file, level=args.log_level)
@@ -79,6 +80,7 @@ if __name__ == '__main__':
         CACHE_MINUTES=args.cache_minutes,
         CACHE_READ=args.cache_read,
         CACHE_WRITE=args.cache_write,
+        USE_PROPERTY_FALLBACK=args.use_property_fallback,
     )
 
     app.run(args.listen_addr, args.listen_port, threaded=True)
