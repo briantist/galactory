@@ -1,3 +1,5 @@
+[![Test](https://github.com/briantist/galactory/actions/workflows/test.yml/badge.svg)](https://github.com/briantist/galactory/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/briantist/galactory/branch/main/graph/badge.svg?token=5ZS2WXM4K9)](https://codecov.io/gh/briantist/galactory)
+
 # galactory
 galactory is An Ansible Galaxy proxy for Artifactory.
 
