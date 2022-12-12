@@ -154,7 +154,9 @@ class ProxyUpstream:
         req = self._rewrite_to_upstream(request, self._upstream)
         with _session_with_retries() as s:
             try:
-                resp = s.send(req, stream=True)
+                # Merge environment settings into session
+                settings = s.merge_environment_settings(req.url, {}, True, None, None)
+                resp = s.send(req, **settings)
                 resp.raise_for_status()
             except:
                 abort(Response(resp.text, resp.status_code))
@@ -171,7 +173,9 @@ class ProxyUpstream:
             req = self._rewrite_to_upstream(request, self._upstream)
             with _session_with_retries() as s:
                 try:
-                    resp = s.send(req)
+                    # Merge environment settings into session
+                    settings = s.merge_environment_settings(req.url, {}, None, None, None)
+                    resp = s.send(req, **settings)
                     resp.raise_for_status()
                 except requests.exceptions.HTTPError:
                     infoer = current_app.logger.debug if resp.status_code == C.HTTP_NOT_FOUND else current_app.logger.warning
