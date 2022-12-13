@@ -155,7 +155,7 @@ class ProxyUpstream:
         with _session_with_retries() as s:
             try:
                 # Merge environment settings into session
-                settings = s.merge_environment_settings(req.url, {}, True, None, None)
+                settings = s.merge_environment_settings(req.url, proxies={}, stream=True, verify=None, cert=None)
                 resp = s.send(req, **settings)
                 resp.raise_for_status()
             except:
