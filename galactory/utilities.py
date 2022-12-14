@@ -65,6 +65,8 @@ def load_manifest_from_archive(handle, seek_to_zero_after=True):
 
 
 def discover_collections(repo, namespace=None, name=None, version=None, fast_detection=True):
+    _scheme=current_app.config.get('PREFERRED_URL_SCHEME')
+
     for p in repo:
         if fast_detection:
             # we're going to use the naming convention to eliminate candidates early,
@@ -108,6 +110,7 @@ def discover_collections(repo, namespace=None, name=None, version=None, fast_det
                 'download.download',
                 filename=p.name,
                 _external=True,
+                _scheme=_scheme,
             ),
             'mime_type': info.mime_type,
             'version': props['version'][0],
@@ -146,6 +149,8 @@ def collected_collections(repo, namespace=None, name=None):
 
 
 def _collection_listing(repo, namespace=None, collection=None):
+    _scheme=current_app.config.get('PREFERRED_URL_SCHEME')
+
     collections = collected_collections(repo, namespace, collection)
 
     results = []
@@ -164,6 +169,7 @@ def _collection_listing(repo, namespace=None, collection=None):
                 namespace=latest['namespace']['name'],
                 collection=latest['name'],
                 _external=True,
+                _scheme=_scheme,
             ),
             'latest_version': {
                 'href': url_for(
@@ -172,6 +178,7 @@ def _collection_listing(repo, namespace=None, collection=None):
                     collection=latest['name'],
                     version=latest['version'],
                     _external=True,
+                    _scheme=_scheme,
                 ),
                 "version": latest['version'],
             }

@@ -70,6 +70,7 @@ def versions(namespace, collection):
     cache_minutes = current_app.config['CACHE_MINUTES']
     cache_read = current_app.config['CACHE_READ']
     cache_write = current_app.config['CACHE_WRITE']
+    _scheme=current_app.config.get('PREFERRED_URL_SCHEME')
 
     upstream_result = None
     if upstream and (not no_proxy or namespace not in no_proxy):
@@ -95,6 +96,7 @@ def versions(namespace, collection):
                         collection=i['name'],
                         version=v,
                         _external=True,
+                        _scheme=_scheme,
                     ),
                     'version': v,
                 }
@@ -124,6 +126,7 @@ def version(namespace, collection, version):
     cache_minutes = current_app.config['CACHE_MINUTES']
     cache_read = current_app.config['CACHE_READ']
     cache_write = current_app.config['CACHE_WRITE']
+    _scheme=current_app.config.get('PREFERRED_URL_SCHEME')
 
     try:
         info = next(discover_collections(repository, namespace=namespace, name=collection, version=version))
@@ -142,7 +145,13 @@ def version(namespace, collection, version):
             'size': info['size'],
         },
         'collection': {
-            'href': url_for('api.v2.collection', namespace=namespace, collection=collection, _external=True),
+            'href': url_for(
+                'api.v2.collection',
+                namespace=namespace,
+                collection=collection,
+                _external=True,
+                _scheme=_scheme,
+            ),
             'name': info['name'],
         },
         'namespace': info['namespace'],
@@ -163,6 +172,7 @@ def publish():
     file = request.files['file']
     skip_configured_key = current_app.config['PUBLISH_SKIP_CONFIGURED_KEY']
     property_fallback = current_app.config.get('USE_PROPERTY_FALLBACK', False)
+    _scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
     target = authorize(request, current_app.config['ARTIFACTORY_PATH'] / file.filename, skip_configured_key=skip_configured_key)
 
@@ -172,4 +182,4 @@ def publish():
 
         upload_collection_from_hashed_tempfile(target, tmp, property_fallback=property_fallback)
 
-    return jsonify(task=url_for('api.v2.import_singleton', _external=True))
+    return jsonify(task=url_for('api.v2.import_singleton', _external=True, _scheme=_scheme))
