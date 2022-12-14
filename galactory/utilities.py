@@ -159,7 +159,7 @@ def _collection_listing(repo, namespace=None, collection=None):
         latest = i['latest']
 
         result = {
-            'href': request.url,
+            'href': url_for(request.endpoint, _external=True, _scheme=_scheme, **request.view_args),
             'name': latest['name'],
             'namespace': latest['namespace'],
             'created': latest['created'],

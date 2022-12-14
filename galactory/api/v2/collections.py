@@ -157,7 +157,7 @@ def version(namespace, collection, version):
         'namespace': info['namespace'],
         'download_url': info['download_url'],
         'hidden': False,
-        'href': request.url,
+        'href': url_for(request.endpoint, _external=True, _scheme=_scheme, **request.view_args),
         'id': 0,
         'metadata': info['collection_info'],
         'version': version,
