@@ -26,12 +26,13 @@ def test_collected_collections_skip_missing_version(repository, props):
 
 @pytest.mark.parametrize('namespace', [None, 'community', 'briantist', 'fake'])
 @pytest.mark.parametrize('collection', [None, 'whatever', 'hashi_vault', 'fake'])
-def test_collected_collections_any(repository, discover_collections, namespace, collection, app_request_context):
+@pytest.mark.parametrize('scheme', [None, '', 'https'])
+def test_collected_collections_any(repository, discover_collections, namespace, collection, scheme, app_request_context):
     fqcn = None if any([namespace is None, collection is None]) else f"{namespace}.{collection}"
 
-    collections = collected_collections(repository, namespace, collection)
+    collections = collected_collections(repository, namespace, collection, scheme)
 
-    discover_collections.assert_called_once_with(repository, namespace=namespace, name=collection)
+    discover_collections.assert_called_once_with(repository, namespace=namespace, name=collection, scheme=scheme)
 
     contents = list(repository)
 
@@ -40,16 +41,24 @@ def test_collected_collections_any(repository, discover_collections, namespace, 
     if 'fake' in [namespace, collection]:
         assert collections == {}
 
+    if scheme is None:
+        expected_scheme = 'http://'
+    elif scheme == '':
+        expected_scheme = '//'
+    else:
+        expected_scheme = scheme
+
     cols = 0
     for col, data in collections.items():
         assert fqcn is None or col == fqcn
         assert 'latest' in data
         assert 'versions' in data
         assert data['latest']['version'] in data['versions']
+        assert data['latest']['download_url'].startswith(expected_scheme), data['latest']['download_url']
 
         for v, vd in data['versions'].items():
             cols += 1
-            ver = next(discover_collections(repository, namespace=vd['namespace']['name'], name=vd['name'], version=v))
+            ver = next(discover_collections(repository, namespace=vd['namespace']['name'], name=vd['name'], version=v, scheme=scheme))
             assert ver == vd
 
     assert cols <= len(contents)

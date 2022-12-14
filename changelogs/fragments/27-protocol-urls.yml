@@ -2,3 +2,4 @@
 bugfixes:
   - generated URLs had now way to set the scheme for use reverse proxies or load balancers (https://github.com/briantist/galactory/issues/27).
   - the ``href`` field in responses did not properly use the server name or the new support schemes (https://github.com/briantist/galactory/pull/29).
+  - the bare ``collections/`` endpoint was not using authorization and would have failed if authentication was required to read from Artifactory (https://github.com/briantist/galactory/pull/29).
