@@ -16,7 +16,7 @@ API_RESPONSE = {
 bp = Blueprint('api', __name__, url_prefix='/api')
 bp.register_blueprint(v2)
 
-
+@bp.route('')
 @bp.route('/')
 def api():
     return jsonify(API_RESPONSE)
