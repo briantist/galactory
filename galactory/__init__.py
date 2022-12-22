@@ -72,6 +72,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
     parser.add_argument('--listen-addr', default='0.0.0.0', type=str, env_var='GALACTORY_LISTEN_ADDR', help='The IP address to listen on.')
     parser.add_argument('--listen-port', default=5555, type=int, env_var='GALACTORY_LISTEN_PORT', help='The TCP port to listen on.')
     parser.add_argument('--server-name', type=str, env_var='GALACTORY_SERVER_NAME', help='The host name and port of the server, as seen from clients. Used for generating links.')
+    parser.add_argument('--preferred-url-scheme', type=str, env_var='GALACTORY_PREFERRED_URL_SCHEME', help='Sets the preferred scheme to use when constructing URLs. Defaults to the request scheme, but is unaware of reverse proxies.')
     parser.add_argument('--artifactory-path', type=str, required=True, env_var='GALACTORY_ARTIFACTORY_PATH', help='The URL of the path in Artifactory where collections are stored.')
     parser.add_argument('--artifactory-api-key', type=str, env_var='GALACTORY_ARTIFACTORY_API_KEY', help='If set, is the API key used to access Artifactory.')
     parser.add_argument('--use-galaxy-key', action='store_true', env_var='GALACTORY_USE_GALAXY_KEY', help='If set, uses the Galaxy token as the Artifactory API key.')
@@ -112,6 +113,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
         PREFER_CONFIGURED_KEY=args.prefer_configured_key,
         PUBLISH_SKIP_CONFIGURED_KEY=args.publish_skip_configured_key,
         SERVER_NAME=args.server_name,
+        PREFERRED_URL_SCHEME=args.preferred_url_scheme,
         CACHE_MINUTES=args.cache_minutes,
         CACHE_READ=args.cache_read,
         CACHE_WRITE=args.cache_write,

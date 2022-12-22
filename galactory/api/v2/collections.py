@@ -21,7 +21,10 @@ from ...upstream import ProxyUpstream
 @v2.route('/collections')
 @v2.route('/collections/')
 def collections():
-    results = _collection_listing(current_app.config['ARTIFACTORY_PATH'])
+    repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
+    scheme=current_app.config.get('PREFERRED_URL_SCHEME')
+
+    results = _collection_listing(repo=repository, scheme=scheme)
     return jsonify(results=results)
 
 
@@ -34,13 +37,14 @@ def collection(namespace, collection):
     cache_minutes = current_app.config['CACHE_MINUTES']
     cache_read = current_app.config['CACHE_READ']
     cache_write = current_app.config['CACHE_WRITE']
+    scheme=current_app.config.get('PREFERRED_URL_SCHEME')
 
     upstream_result = None
     if upstream and (not no_proxy or namespace not in no_proxy):
         proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
         upstream_result = proxy.proxy(request)
 
-    results = _collection_listing(repository, namespace, collection)
+    results = _collection_listing(repository, namespace, collection, scheme=scheme)
 
     if not (results or upstream_result):
         abort(C.HTTP_NOT_FOUND)
@@ -70,13 +74,14 @@ def versions(namespace, collection):
     cache_minutes = current_app.config['CACHE_MINUTES']
     cache_read = current_app.config['CACHE_READ']
     cache_write = current_app.config['CACHE_WRITE']
+    scheme=current_app.config.get('PREFERRED_URL_SCHEME')
 
     upstream_result = None
     if upstream and (not no_proxy or namespace not in no_proxy):
         proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
         upstream_result = proxy.proxy(request)
 
-    collections = collected_collections(repository, namespace=namespace, name=collection)
+    collections = collected_collections(repository, namespace=namespace, name=collection, scheme=scheme)
 
     if not (collections or upstream_result):
         abort(C.HTTP_NOT_FOUND)
@@ -95,6 +100,7 @@ def versions(namespace, collection):
                         collection=i['name'],
                         version=v,
                         _external=True,
+                        _scheme=scheme,
                     ),
                     'version': v,
                 }
@@ -124,9 +130,10 @@ def version(namespace, collection, version):
     cache_minutes = current_app.config['CACHE_MINUTES']
     cache_read = current_app.config['CACHE_READ']
     cache_write = current_app.config['CACHE_WRITE']
+    scheme=current_app.config.get('PREFERRED_URL_SCHEME')
 
     try:
-        info = next(discover_collections(repository, namespace=namespace, name=collection, version=version))
+        info = next(discover_collections(repository, namespace=namespace, name=collection, version=version, scheme=scheme))
     except StopIteration:
         if upstream and (not no_proxy or namespace not in no_proxy):
             proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
@@ -142,13 +149,19 @@ def version(namespace, collection, version):
             'size': info['size'],
         },
         'collection': {
-            'href': url_for('api.v2.collection', namespace=namespace, collection=collection, _external=True),
+            'href': url_for(
+                'api.v2.collection',
+                namespace=namespace,
+                collection=collection,
+                _external=True,
+                _scheme=scheme,
+            ),
             'name': info['name'],
         },
         'namespace': info['namespace'],
         'download_url': info['download_url'],
         'hidden': False,
-        'href': request.url,
+        'href': url_for(request.endpoint, _external=True, _scheme=scheme, **request.view_args),
         'id': 0,
         'metadata': info['collection_info'],
         'version': version,
@@ -163,6 +176,7 @@ def publish():
     file = request.files['file']
     skip_configured_key = current_app.config['PUBLISH_SKIP_CONFIGURED_KEY']
     property_fallback = current_app.config.get('USE_PROPERTY_FALLBACK', False)
+    _scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
     target = authorize(request, current_app.config['ARTIFACTORY_PATH'] / file.filename, skip_configured_key=skip_configured_key)
 
@@ -172,4 +186,4 @@ def publish():
 
         upload_collection_from_hashed_tempfile(target, tmp, property_fallback=property_fallback)
 
-    return jsonify(task=url_for('api.v2.import_singleton', _external=True))
+    return jsonify(task=url_for('api.v2.import_singleton', _external=True, _scheme=_scheme))

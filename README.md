@@ -31,6 +31,7 @@ Pulling out this bit about configuration for emphasis:
 ```text
 usage: python -m galactory [-h] [-c CONFIG] [--listen-addr LISTEN_ADDR]
                            [--listen-port LISTEN_PORT] [--server-name SERVER_NAME]
+                           [--preferred-url-scheme PREFERRED_URL_SCHEME]
                            --artifactory-path ARTIFACTORY_PATH
                            [--artifactory-api-key ARTIFACTORY_API_KEY] [--use-galaxy-key]
                            [--prefer-configured-key] [--publish-skip-configured-key]
@@ -54,6 +55,10 @@ optional arguments:
   --server-name SERVER_NAME
                         The host name and port of the server, as seen from clients. Used for
                         generating links. [env var: GALACTORY_SERVER_NAME]
+  --preferred-url-scheme PREFERRED_URL_SCHEME
+                        Sets the preferred scheme to use when constructing URLs. Defaults to
+                        the request scheme, but is unaware of reverse proxies.
+                        [env var: GALACTORY_PREFERRED_URL_SCHEME]
   --artifactory-path ARTIFACTORY_PATH
                         The URL of the path in Artifactory where collections are stored.
                         [env var: GALACTORY_ARTIFACTORY_PATH]

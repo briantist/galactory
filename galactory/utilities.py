@@ -64,7 +64,7 @@ def load_manifest_from_archive(handle, seek_to_zero_after=True):
                 return data
 
 
-def discover_collections(repo, namespace=None, name=None, version=None, fast_detection=True):
+def discover_collections(repo, namespace=None, name=None, version=None, fast_detection=True, scheme=None):
     for p in repo:
         if fast_detection:
             # we're going to use the naming convention to eliminate candidates early,
@@ -108,6 +108,7 @@ def discover_collections(repo, namespace=None, name=None, version=None, fast_det
                 'download.download',
                 filename=p.name,
                 _external=True,
+                _scheme=scheme,
             ),
             'mime_type': info.mime_type,
             'version': props['version'][0],
@@ -124,10 +125,10 @@ def discover_collections(repo, namespace=None, name=None, version=None, fast_det
             yield coldata
 
 
-def collected_collections(repo, namespace=None, name=None):
+def collected_collections(repo, namespace=None, name=None, scheme=None):
     collections = {}
 
-    for c in discover_collections(repo, namespace=namespace, name=name):
+    for c in discover_collections(repo, namespace=namespace, name=name, scheme=scheme):
         version = c['version']
         ver = c['semver']
         col = collections.setdefault(c['fqcn'], {})
@@ -145,7 +146,7 @@ def collected_collections(repo, namespace=None, name=None):
     return collections
 
 
-def _collection_listing(repo, namespace=None, collection=None):
+def _collection_listing(repo, namespace=None, collection=None, scheme=None):
     collections = collected_collections(repo, namespace, collection)
 
     results = []
@@ -154,7 +155,7 @@ def _collection_listing(repo, namespace=None, collection=None):
         latest = i['latest']
 
         result = {
-            'href': request.url,
+            'href': url_for(request.endpoint, _external=True, _scheme=scheme, **request.view_args),
             'name': latest['name'],
             'namespace': latest['namespace'],
             'created': latest['created'],
@@ -164,6 +165,7 @@ def _collection_listing(repo, namespace=None, collection=None):
                 namespace=latest['namespace']['name'],
                 collection=latest['name'],
                 _external=True,
+                _scheme=scheme,
             ),
             'latest_version': {
                 'href': url_for(
@@ -172,6 +174,7 @@ def _collection_listing(repo, namespace=None, collection=None):
                     collection=latest['name'],
                     version=latest['version'],
                     _external=True,
+                    _scheme=scheme,
                 ),
                 "version": latest['version'],
             }
