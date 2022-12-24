@@ -3,6 +3,7 @@
 
 import pytest
 import json
+import sys
 
 from shutil import copytree
 from artifactory import _ArtifactoryAccessor, _FakePathTemplate, ArtifactoryPath
@@ -64,9 +65,24 @@ def mock_artifactory_accessor(fixture_loader, virtual_fs_repo):
 
 @pytest.fixture
 def mock_artifactory_path(mock_artifactory_accessor, virtual_fs_repo):
+    _artifactory_accessor = mock_artifactory_accessor()
+
     class MockArtifactoryPath(ArtifactoryPath):
+        if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+            _accessor = _artifactory_accessor
+        else:
+            # in 3.9 and below Pathlib limits what members can be present in 'Path' class
+            __slots__ = ("auth", "verify", "cert", "session", "timeout")
+
+        def __new__(cls, *args, **kwargs):
+            obj = super().__new__(cls, *args, **kwargs)
+            rel = str(obj).split('/repo/', 1)[1]
+            obj._galactory_mocked_path = virtual_fs_repo / rel
+            obj._n = True
+            return obj
+
         def _init(self, *args, **kwargs):
-            new = super()._init(*args, template=_FakePathTemplate(mock_artifactory_accessor()), **kwargs)
+            new = super()._init(*args, template=_FakePathTemplate(_artifactory_accessor), **kwargs)
             rel = str(self).split('/repo/', 1)[1]
             self._galactory_mocked_path = virtual_fs_repo / rel
             return new
@@ -78,6 +94,18 @@ def mock_artifactory_path(mock_artifactory_accessor, virtual_fs_repo):
             else:
                 return False
             # return super().is_dir()
+
+        def _make_child(self, args):
+            obj = super()._make_child(args)
+            return self._galactory_copy_attrs(obj)
+
+        def _make_child_relpath(self, args):
+            obj = super()._make_child_relpath(args)
+            return self._galactory_copy_attrs(obj)
+
+        def _galactory_copy_attrs(self, obj):
+            obj._galactory_mocked_path = self._galactory_mocked_path
+            return obj
 
         @property
         def _galactory_manifest_path(self):
