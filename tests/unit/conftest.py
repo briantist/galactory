@@ -68,18 +68,29 @@ def mock_artifactory_path(mock_artifactory_accessor, virtual_fs_repo):
     _artifactory_accessor = mock_artifactory_accessor()
 
     class MockArtifactoryPath(ArtifactoryPath):
-        if sys.version_info.major == 3 and sys.version_info.minor >= 10:
-            _accessor = _artifactory_accessor
-        else:
-            # in 3.9 and below Pathlib limits what members can be present in 'Path' class
-            __slots__ = ("auth", "verify", "cert", "session", "timeout")
-
-        def __new__(cls, *args, **kwargs):
+        def _new__new__(cls, *args, **kwargs):
             obj = super().__new__(cls, *args, **kwargs)
             rel = str(obj).split('/repo/', 1)[1]
             obj._galactory_mocked_path = virtual_fs_repo / rel
             obj._n = True
             return obj
+
+        def _new_make_child(self, args):
+            obj = super()._make_child(args)
+            return self._galactory_copy_attrs(obj)
+
+        def _new_make_child_relpath(self, args):
+            obj = super()._make_child_relpath(args)
+            return self._galactory_copy_attrs(obj)
+
+        if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+            _accessor = _artifactory_accessor
+            __new__ = _new__new__
+            _make_child = _new_make_child
+            _make_child_relpath = _new_make_child_relpath
+        else:
+            # in 3.9 and below Pathlib limits what members can be present in 'Path' class
+            __slots__ = ("auth", "verify", "cert", "session", "timeout")
 
         def _init(self, *args, **kwargs):
             new = super()._init(*args, template=_FakePathTemplate(_artifactory_accessor), **kwargs)
@@ -94,14 +105,6 @@ def mock_artifactory_path(mock_artifactory_accessor, virtual_fs_repo):
             else:
                 return False
             # return super().is_dir()
-
-        def _make_child(self, args):
-            obj = super()._make_child(args)
-            return self._galactory_copy_attrs(obj)
-
-        def _make_child_relpath(self, args):
-            obj = super()._make_child_relpath(args)
-            return self._galactory_copy_attrs(obj)
 
         def _galactory_copy_attrs(self, obj):
             obj._galactory_mocked_path = self._galactory_mocked_path
