@@ -90,7 +90,7 @@ def mock_artifactory_path(mock_artifactory_accessor, virtual_fs_repo):
             _make_child_relpath = _new_make_child_relpath
         else:
             # in 3.9 and below Pathlib limits what members can be present in 'Path' class
-            __slots__ = ("auth", "verify", "cert", "session", "timeout")
+            __slots__ = ("auth", "verify", "cert", "session", "timeout", "_galactory_mocked_path")
 
         def _init(self, *args, **kwargs):
             new = super()._init(*args, template=_FakePathTemplate(_artifactory_accessor), **kwargs)
