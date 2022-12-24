@@ -1,4 +1,4 @@
-FROM python:3.10-slim as build
+FROM python:3.11-slim as build
 
 RUN python -m venv /venv
 ENV PATH=/venv/bin:$PATH
@@ -10,7 +10,7 @@ COPY . /galactory
 RUN pip install ./galactory
 
 
-FROM python:3.10-slim as final
+FROM python:3.11-slim as final
 
 COPY --from=build /venv /venv
 ENV PATH=/venv/bin:$PATH
