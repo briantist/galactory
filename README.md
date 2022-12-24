@@ -40,6 +40,8 @@ usage: python -m galactory [-h] [-c CONFIG] [--listen-addr LISTEN_ADDR]
                            [--log-body] [--proxy-upstream PROXY_UPSTREAM]
                            [-npns NO_PROXY_NAMESPACE] [--cache-minutes CACHE_MINUTES]
                            [--cache-read CACHE_READ] [--cache-write CACHE_WRITE]
+                           [--use-property-fallback]
+                           [--health-check-custom-text HEALTH_CHECK_CUSTOM_TEXT]
 
 galactory is a partial Ansible Galaxy proxy that uploads and downloads collections, using an
 Artifactory generic repository as its backend.
@@ -102,6 +104,9 @@ optional arguments:
                         Requires a Pro license of Artifactory. This feature is a workaround for an
                         Artifactory proxy configuration error and may be removed in a future version.
                         [env var: GALACTORY_USE_PROPERTY_FALLBACK]
+  --health-check-custom-text HEALTH_CHECK_CUSTOM_TEXT
+                        Sets custom_text field for health check endpoint responses.
+                        [env var: GALACTORY_HEALTH_CHECK_CUSTOM_TEXT]
 
 Args that start with '--' (eg. --listen-addr) can also be set in a config file
 (/etc/galactory.d/*.conf or ~/.galactory/*.conf or specified via -c). Config file syntax allows:
