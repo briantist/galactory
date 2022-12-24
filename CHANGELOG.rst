@@ -5,6 +5,35 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.8.0
+======
+
+Release Summary
+---------------
+
+This version is full of new features and bugfixes, and our first external contributor!
+
+There's a new factory method that lets you re-use the same config system in place as the CLI without starting the internal web server, for use with a custom WSGI server, support for Brotli compression in upstreams, proper use of proxy environment variables, a new parameter to set a preferred URL scheme to help with reverse proxy use, and the first health check endpoint.
+
+This release also removes use of a deprecated Flask feature (not user facing) and fixed the tests to work with Python 3.10 and 3.11, which we now test in CI.
+
+Minor Changes
+-------------
+
+- WSGI support - in addition to the bare ``create_app`` factory function, there is now a ``create_configurd_app`` factory function, which uses the same argument parsing as running from the CLI; this allows for using an external WSGI server while taking advantage of the environment variables and configuration file support to set the configuration (https://github.com/briantist/galactory/pull/28).
+- healthchecks - the first health check endpoint has been added, which can be used for load balancers, reverse proxies, smart DNS, and more (https://github.com/briantist/galactory/issues/30).
+- upstream proxying - merge the ``requests`` environment for proxied requests so that environment variables such as ``REQUESTS_CA_BUNDLE`` are used appropriately (https://github.com/briantist/galactory/issues/25).
+
+Bugfixes
+--------
+
+- generated URLs had no way to set the scheme for use reverse proxies or load balancers (https://github.com/briantist/galactory/issues/27).
+- the ``/api/`` endpoint did not define a route that didn't end in ``/``, which caused Flask to issue a redirect, however the redirect does not use the preferred scheme (https://github.com/briantist/galactory/pull/29).
+- the ``href`` field in responses did not use the new support for schemes (https://github.com/briantist/galactory/pull/29).
+- the bare ``collections/`` endpoint was not using authorization and would have failed if authentication was required to read from Artifactory (https://github.com/briantist/galactory/pull/29).
+- upstream proxying - proxied requests used the ``Accept:`` header of the request, sometimes resulting in HTML from the upstream and a resulting 500 error since the response was not JSON (https://github.com/briantist/galactory/issues/31).
+- upstream proxying - proxied requests with an ``Accept-Encoding: br`` (brotli compression) header would fail decoding because of the lack of a brotli decoder (https://github.com/briantist/galactory/pull/32).
+
 v0.7.0
 ======
 

@@ -1,0 +1,7 @@
+---
+release_summary: |-
+  This version is full of new features and bugfixes, and our first external contributor!
+
+  There's a new factory method that lets you re-use the same config system in place as the CLI without starting the internal web server, for use with a custom WSGI server, support for Brotli compression in upstreams, proper use of proxy environment variables, a new parameter to set a preferred URL scheme to help with reverse proxy use, and the first health check endpoint.
+
+  This release also removes use of a deprecated Flask feature (not user facing) and fixed the tests to work with Python 3.10 and 3.11, which we now test in CI.
