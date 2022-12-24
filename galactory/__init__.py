@@ -2,10 +2,11 @@
 # (c) 2022 Brian Scholer (@briantist)
 
 import logging
+import typing as t
 
 from datetime import datetime
 from flask import Flask, request
-from flask.json import JSONEncoder
+from flask.json.provider import DefaultJSONProvider
 from configargparse import ArgParser, ArgumentError, Action
 from artifactory import ArtifactoryPath
 
@@ -13,8 +14,10 @@ from .api import bp as api
 from .download import bp as download
 from .health import bp as health
 
-class DateTimeIsoFormatJSONEncoder(JSONEncoder):
-    def default(self, o):
+
+class DateTimeIsoFormatJSONProvider(DefaultJSONProvider):
+    @staticmethod
+    def default(o: t.Any) -> t.Any:
         if isinstance(o, datetime):
             return o.isoformat()
 
@@ -23,7 +26,7 @@ class DateTimeIsoFormatJSONEncoder(JSONEncoder):
 
 def create_app(**config):
     app = Flask(__name__)
-    app.json_encoder = DateTimeIsoFormatJSONEncoder
+    app.json = DateTimeIsoFormatJSONProvider(app)
     app.config.update(**config)
     app.register_blueprint(health)
     app.register_blueprint(api)
