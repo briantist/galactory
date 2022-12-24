@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - healthchecks - the first health check endpoint has been added, which can be used for load balancers, reverse proxies, smart DNS, and more (https://github.com/briantist/galactory/issues/30).
