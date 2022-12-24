@@ -22,7 +22,7 @@ from ...upstream import ProxyUpstream
 @v2.route('/collections/')
 def collections():
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
-    scheme=current_app.config.get('PREFERRED_URL_SCHEME')
+    scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
     results = _collection_listing(repo=repository, scheme=scheme)
     return jsonify(results=results)
@@ -37,7 +37,7 @@ def collection(namespace, collection):
     cache_minutes = current_app.config['CACHE_MINUTES']
     cache_read = current_app.config['CACHE_READ']
     cache_write = current_app.config['CACHE_WRITE']
-    scheme=current_app.config.get('PREFERRED_URL_SCHEME')
+    scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
     upstream_result = None
     if upstream and (not no_proxy or namespace not in no_proxy):
@@ -74,7 +74,7 @@ def versions(namespace, collection):
     cache_minutes = current_app.config['CACHE_MINUTES']
     cache_read = current_app.config['CACHE_READ']
     cache_write = current_app.config['CACHE_WRITE']
-    scheme=current_app.config.get('PREFERRED_URL_SCHEME')
+    scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
     upstream_result = None
     if upstream and (not no_proxy or namespace not in no_proxy):
@@ -130,7 +130,7 @@ def version(namespace, collection, version):
     cache_minutes = current_app.config['CACHE_MINUTES']
     cache_read = current_app.config['CACHE_READ']
     cache_write = current_app.config['CACHE_WRITE']
-    scheme=current_app.config.get('PREFERRED_URL_SCHEME')
+    scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
     try:
         info = next(discover_collections(repository, namespace=namespace, name=collection, version=version, scheme=scheme))

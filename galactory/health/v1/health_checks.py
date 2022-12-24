@@ -3,7 +3,7 @@
 
 from datetime import datetime
 from time import perf_counter
-from flask import jsonify, g as ctx, current_app
+from flask import jsonify, g as ctx, current_app, url_for, request
 
 from . import bp
 
@@ -17,11 +17,15 @@ def start_timer():
 def commonize(response):
     elapsed_ms = int((perf_counter() - ctx.start_time) * 1000)
 
+    scheme = current_app.config.get('PREFERRED_URL_SCHEME')
+    custom_txt = current_app.config.get('HEALTH_CHECK_CUSTOM_TEXT', '')
+
     data = response.get_json()
 
     data['elapsed_ms'] = elapsed_ms
     data['response_time'] = datetime.utcnow()
-    data['custom_text'] = current_app.config.get('HEALTH_CHECK_CUSTOM_TEXT', '')
+    data['custom_text'] = custom_txt
+    data['href'] = url_for(request.endpoint, _external=True, _scheme=scheme, **request.view_args)
 
     response.data = current_app.json.dumps(data)
 
