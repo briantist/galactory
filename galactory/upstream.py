@@ -226,6 +226,7 @@ class ProxyUpstream:
         current_app.logger.info(f"Rewriting '{this_url}' to '{rewritten}'")
 
         headers = {k: v for k, v in request.headers.items() if k not in ['Authorization', 'Host']}
+        headers['Accept'] = 'application/json, */*'
 
         req = requests.Request(method=request.method, url=rewritten, headers=headers, data=request.data)
 

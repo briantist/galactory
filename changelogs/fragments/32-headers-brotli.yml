@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - upstream proxying - proxied requests used the ``Accept:`` header of the request, sometimes resulting in HTML from the upstream and a resulting 500 error since the response was not JSON (https://github.com/briantist/galactory/issues/31).
+  - "upstream proxying - proxied requests with an ``Accept-Encoding: br`` (brotli compression) header would fail decoding because of the lack of a brotli decoder (https://github.com/briantist/galactory/pull/32)."
