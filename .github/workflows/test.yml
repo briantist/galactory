@@ -19,8 +19,8 @@ jobs:
         python:
           - '3.8'
           - '3.9'
-          # - '3.10'  # tests totally broken.. mocks don't seem to work
-          # - '3.11-dev'  # test broken:  AttributeError: module 'pathlib' has no attribute '_Accessor'
+          - '3.10'
+          - '3.11'
     env:
       PYTEST_ADDOPTS: '--color=yes'
     outputs:
@@ -45,9 +45,9 @@ jobs:
         id: setvars
         run: |
           VER_TAG=${GITHUB_REF/refs\/tags\/v/}
-          echo "::set-output name=relver::${VER_TAG}"
-          echo "::set-output name=branch::${GITHUB_REF#refs/heads/}"
-          echo "::set-output name=changelogver::v${VER_TAG//\./-}"
+          echo "relver=${VER_TAG}" >> $GITHUB_OUTPUT
+          echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+          echo "changelogver=v${VER_TAG//\./-}" >> $GITHUB_OUTPUT
 
       - name: Coverage
         uses: codecov/codecov-action@v3
