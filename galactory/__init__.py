@@ -4,6 +4,7 @@
 import logging
 
 from flask import Flask, request
+from werkzeug.middleware.proxy_fix import ProxyFix
 from configargparse import ArgParser, ArgumentError, Action
 from artifactory import ArtifactoryPath
 
@@ -13,6 +14,7 @@ from .api import bp as api
 from .download import bp as download
 from .health import bp as health
 from .root import bp as root
+
 
 def create_app(**config):
     app = Flask(__name__)
@@ -54,7 +56,7 @@ class _StrBool(Action):
         setattr(namespace, self.dest, self._booler(values))
 
 
-def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=False):
+def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=False, proxy_fix=False, **extra):
     parser = ArgParser(
         prog='python -m galactory',
         description=(
@@ -117,6 +119,10 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
         USE_PROPERTY_FALLBACK=args.use_property_fallback,
         HEALTH_CHECK_CUSTOM_TEXT=args.health_check_custom_text,
     )
+
+    if proxy_fix:
+        proxy_args = {k: v for k, v in extra.items() if k.startswith('x_')}
+        app = ProxyFix(app, **proxy_args)
 
     if run:
         app.run(args.listen_addr, args.listen_port, threaded=True)

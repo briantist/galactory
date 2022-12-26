@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - factory methods - add basic support for ``ProxyFix`` to the ``create_configured_app`` factory method (https://github.com/briantist/galactory/pull/48).
