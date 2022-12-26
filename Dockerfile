@@ -3,7 +3,7 @@ FROM python:3.11-slim as build
 RUN python -m venv /venv
 ENV PATH=/venv/bin:$PATH
 
-RUN pip install --no-cache-dir --upgrade pip setuptools build
+RUN pip install --no-cache-dir --upgrade pip setuptools build wheel
 
 COPY . /galactory
 
