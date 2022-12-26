@@ -1,0 +1,3 @@
+---
+release_summary: |-
+  Another bugfix for upstream, this time for scheme rewriting in generated URLs.
