@@ -9,7 +9,7 @@ from io import StringIO
 from datetime import datetime, timedelta
 from artifactory import ArtifactoryException
 
-from flask import current_app, abort, Response
+from flask import current_app, abort, Response, url_for
 
 from . import constants as C
 from .utilities import _session_with_retries, DateTimeIsoFormatJSONProvider
@@ -166,6 +166,7 @@ class ProxyUpstream:
 
     def proxy(self, request):
         cache = self._get_cache(request)
+        scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
         if cache.empty or cache.expired:
             req = self._rewrite_to_upstream(request, self._upstream)
@@ -196,7 +197,7 @@ class ProxyUpstream:
         else:
             current_app.logger.info(f"Cache hit: {request.url}")
 
-        return self._rewrite_upstream_response(cache.data, request.url_root)
+        return self._rewrite_upstream_response(cache.data, url_for('root.index', _external=True, _scheme=scheme))
 
     def _rewrite_upstream_response(self, response_data, url_root) -> dict:
         ret = {}
