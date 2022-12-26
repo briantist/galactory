@@ -12,9 +12,7 @@ from artifactory import ArtifactoryException
 from flask import current_app, abort, Response
 
 from . import constants as C
-from .utilities import _session_with_retries
-from . import DateTimeIsoFormatJSONProvider
-
+from .utilities import _session_with_retries, DateTimeIsoFormatJSONProvider
 
 class _CacheEntry:
     _raw = {}
