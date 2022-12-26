@@ -6,8 +6,8 @@ from galactory.api import API_RESPONSE
 
 from datetime import datetime
 
-def test_api(client):
-    response = client.get('/api/')
+def test_api(client, trailer):
+    response = client.get(trailer('/api'))
     data = response.json
 
     assert response.status_code == C.HTTP_OK
@@ -16,8 +16,8 @@ def test_api(client):
     assert 'v2' == data['current_version']
 
 
-def test_import_collection_status(client):
-    response = client.get('/api/v2/collection-imports/0/')
+def test_import_collection_status(client, trailer):
+    response = client.get(trailer('/api/v2/collection-imports/0'))
     data = response.json
 
     assert response.status_code == C.HTTP_OK
