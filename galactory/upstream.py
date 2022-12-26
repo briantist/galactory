@@ -12,7 +12,7 @@ from artifactory import ArtifactoryException
 from flask import current_app, abort, Response
 
 from . import constants as C
-from .utilities import _session_with_retries
+from .utilities import _session_with_retries, DateTimeIsoFormatJSONProvider
 
 class _CacheEntry:
     _raw = {}
@@ -140,12 +140,10 @@ class ProxyUpstream:
         if not self._write_cache:
             return
 
-        from . import DateTimeIsoFormatJSONEncoder
-
         path = self._repository / self._cache_path / request.path / 'data.json'
         with StringIO() as buffer:
             cache.update()
-            json.dump(cache._to_serializable_dict(), buffer, cls=DateTimeIsoFormatJSONEncoder)
+            json.dump(cache._to_serializable_dict(), buffer, default=DateTimeIsoFormatJSONProvider.default)
             buffer.seek(0)
             path.deploy(buffer)
 

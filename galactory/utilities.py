@@ -7,8 +7,9 @@ import math
 import hashlib
 import gzip
 
-from typing import Dict, Any
+import typing as t
 
+from datetime import datetime
 from tempfile import SpooledTemporaryFile
 from urllib.request import urlopen
 from urllib3 import Retry
@@ -16,11 +17,22 @@ from requests.adapters import HTTPAdapter
 from requests import Session
 
 from flask import url_for, request, current_app, abort, Response, Request
+from flask.json.provider import DefaultJSONProvider
 from artifactory import ArtifactoryPath, ArtifactoryException
 from dohq_artifactory.auth import XJFrogArtApiAuth
 
 from . import constants as C
 from .iter_tar import iter_tar
+
+
+class DateTimeIsoFormatJSONProvider(DefaultJSONProvider):
+    @staticmethod
+    def default(o: t.Any) -> t.Any:
+        if isinstance(o, datetime):
+            return o.isoformat()
+
+        return super().default(o)
+
 
 
 def _session_with_retries(retry=None, auth=None) -> Session:
@@ -228,7 +240,7 @@ def _chunk_to_temp(fsrc, iterator=None, spool_size=5*1024*1024, seek_to_zero=Tru
     return HashedTempFile(tmp, md5sum.hexdigest(), sha1sum.hexdigest(),  sha256sum.hexdigest(), close=close)
 
 
-def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile, property_fallback: bool = False) -> Dict[str, Any]:
+def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile, property_fallback: bool = False) -> t.Dict[str, t.Any]:
     try:
         manifest = load_manifest_from_archive(tmpfile.handle)
     except Exception:

@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - upstream proxying - a previous change to remove deprecated JSON encoder usage in Flask inadvertently broke upstream proxying due a bad import (https://github.com/briantist/galactory/issues/42).
