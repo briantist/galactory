@@ -7,17 +7,19 @@ from flask import Flask, request
 from configargparse import ArgParser, ArgumentError, Action
 from artifactory import ArtifactoryPath
 
+from .utilities import DateTimeIsoFormatJSONProvider
+
 from .api import bp as api
 from .download import bp as download
 from .health import bp as health
-from .utilities import DateTimeIsoFormatJSONProvider
-
+from .root import bp as root
 
 def create_app(**config):
     app = Flask(__name__)
     app.json = DateTimeIsoFormatJSONProvider(app)
     app.config.update(**config)
     app.register_blueprint(health)
+    app.register_blueprint(root)
     app.register_blueprint(api)
     app.register_blueprint(download)
 
