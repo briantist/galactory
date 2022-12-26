@@ -5,6 +5,24 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.8.2
+======
+
+Release Summary
+---------------
+
+Another bugfix for upstream, this time for scheme rewriting in generated URLs.
+
+Minor Changes
+-------------
+
+- site root - the root URL now has a response, just some plain text at this time but may be expanded later (https://github.com/briantist/galactory/pull/46).
+
+Bugfixes
+--------
+
+- upstream proxying - upstream URLs are not rewritten using the preferred scheme (https://github.com/briantist/galactory/issues/45).
+
 v0.8.1
 ======
 
