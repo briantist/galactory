@@ -121,7 +121,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
     )
 
     if proxy_fix:
-        proxy_args = {k: v for k, v in extra if k.startswith('x_')}
+        proxy_args = {k: v for k, v in extra.items() if k.startswith('x_')}
         app = ProxyFix(app, **proxy_args)
 
     if run:
