@@ -5,6 +5,24 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.8.1
+======
+
+Release Summary
+---------------
+
+This patch release fixes the broken upstream proxying I released previously.
+
+Minor Changes
+-------------
+
+- containers - published container images have been updated from Python 3.10 to Python 3.11 (https://github.com/briantist/galactory/pull/41).
+
+Bugfixes
+--------
+
+- upstream proxying - a previous change to remove deprecated JSON encoder usage in Flask inadvertently broke upstream proxying due a bad import (https://github.com/briantist/galactory/issues/42).
+
 v0.8.0
 ======
 

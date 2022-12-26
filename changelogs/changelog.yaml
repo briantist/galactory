@@ -157,3 +157,18 @@ releases:
     - 30-healthchecks.yml
     - 32-headers-brotli.yml
     release_date: '2022-12-24'
+  0.8.1:
+    changes:
+      bugfixes:
+      - upstream proxying - a previous change to remove deprecated JSON encoder usage
+        in Flask inadvertently broke upstream proxying due a bad import (https://github.com/briantist/galactory/issues/42).
+      minor_changes:
+      - containers - published container images have been updated from Python 3.10
+        to Python 3.11 (https://github.com/briantist/galactory/pull/41).
+      release_summary: This patch release fixes the broken upstream proxying I released
+        previously.
+    fragments:
+    - 0.8.1.yml
+    - 41-docker-py311.yml
+    - 42-upstream-proxy-json.yml
+    release_date: '2022-12-25'
