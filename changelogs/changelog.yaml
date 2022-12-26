@@ -172,3 +172,17 @@ releases:
     - 41-docker-py311.yml
     - 42-upstream-proxy-json.yml
     release_date: '2022-12-25'
+  0.8.2:
+    changes:
+      bugfixes:
+      - upstream proxying - upstream URLs are not rewritten using the preferred scheme
+        (https://github.com/briantist/galactory/issues/45).
+      minor_changes:
+      - site root - the root URL now has a response, just some plain text at this
+        time but may be expanded later (https://github.com/briantist/galactory/pull/46).
+      release_summary: Another bugfix for upstream, this time for scheme rewriting
+        in generated URLs.
+    fragments:
+    - 0.8.2.yml
+    - 45-upscheme.yml
+    release_date: '2022-12-26'
