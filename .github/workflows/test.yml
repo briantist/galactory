@@ -37,7 +37,9 @@ jobs:
 
       - name: Requirements
         working-directory: tests
-        run: pip install wheel -r requirements.txt
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
 
       - name: Pytest
         run: pytest tests/
