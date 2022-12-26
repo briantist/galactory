@@ -6,4 +6,4 @@ import pytest
 
 @pytest.fixture(params=['/', ''])
 def trailer(request):
-    yield lambda v: f"{v.rstrip('/')}{request.param}"
+    return lambda v: f"{v.rstrip('/')}{request.param}"
