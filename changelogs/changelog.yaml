@@ -186,3 +186,13 @@ releases:
     - 0.8.2.yml
     - 45-upscheme.yml
     release_date: '2022-12-26'
+  0.9.0:
+    changes:
+      minor_changes:
+      - factory methods - add basic support for ``ProxyFix`` to the ``create_configured_app``
+        factory method (https://github.com/briantist/galactory/pull/48).
+      release_summary: This release adds basic support for ``ProxyFix``.
+    fragments:
+    - 0.9.0.yml
+    - 48-proxyfix.yml
+    release_date: '2022-12-29'
