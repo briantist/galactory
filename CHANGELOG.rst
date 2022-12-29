@@ -5,6 +5,19 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.9.0
+======
+
+Release Summary
+---------------
+
+This release adds basic support for ``ProxyFix``.
+
+Minor Changes
+-------------
+
+- factory methods - add basic support for ``ProxyFix`` to the ``create_configured_app`` factory method (https://github.com/briantist/galactory/pull/48).
+
 v0.8.2
 ======
 
