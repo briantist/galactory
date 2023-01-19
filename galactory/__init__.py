@@ -73,6 +73,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
     parser.add_argument('--preferred-url-scheme', type=str, env_var='GALACTORY_PREFERRED_URL_SCHEME', help='Sets the preferred scheme to use when constructing URLs. Defaults to the request scheme, but is unaware of reverse proxies.')
     parser.add_argument('--artifactory-path', type=str, required=True, env_var='GALACTORY_ARTIFACTORY_PATH', help='The URL of the path in Artifactory where collections are stored.')
     parser.add_argument('--artifactory-api-key', type=str, env_var='GALACTORY_ARTIFACTORY_API_KEY', help='If set, is the API key used to access Artifactory.')
+    parser.add_argument('--artifactory-bearer-token', type=str, env_var='GALACTORY_ARTIFACTORY_BEARER_TOKEN', help='If set, is the Bearer Token used to access Artifactory.')
     parser.add_argument('--use-galaxy-key', action='store_true', env_var='GALACTORY_USE_GALAXY_KEY', help='If set, uses the Galaxy token as the Artifactory API key.')
     parser.add_argument('--prefer-configured-key', action='store_true', env_var='GALACTORY_PREFER_CONFIGURED_KEY', help='If set, prefer the confgured Artifactory key over the Galaxy token.')
     parser.add_argument('--publish-skip-configured-key', action='store_true', env_var='GALACTORY_PUBLISH_SKIP_CONFIGURED_KEY', help='If set, publish endpoint will not use a configured key, only Galaxy token.')
@@ -108,6 +109,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
         PROXY_UPSTREAM=args.proxy_upstream,
         NO_PROXY_NAMESPACES=args.no_proxy_namespace,
         ARTIFACTORY_API_KEY=args.artifactory_api_key,
+        ARTIFACTORY_BEARER_TOKEN=args.artifactory_bearer_token,
         USE_GALAXY_KEY=args.use_galaxy_key,
         PREFER_CONFIGURED_KEY=args.prefer_configured_key,
         PUBLISH_SKIP_CONFIGURED_KEY=args.publish_skip_configured_key,
