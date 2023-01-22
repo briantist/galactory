@@ -19,8 +19,7 @@ from requests import Session
 from flask import url_for, request, current_app, abort, Response, Request
 from flask.json.provider import DefaultJSONProvider
 from artifactory import ArtifactoryPath, ArtifactoryException
-from dohq_artifactory.auth import XJFrogArtApiAuth
-from dohq_artifactory.auth import XJFrogArtBearerAuth
+from dohq_artifactory.auth import XJFrogArtApiAuth, XJFrogArtBearerAuth
 
 from . import constants as C
 from .iter_tar import iter_tar
@@ -55,8 +54,6 @@ def authorize(request: Request, artifactory_path: ArtifactoryPath, retry=None, s
     bearerToken = None
     if not skip_configured_key:
         apikey = current_app.config['ARTIFACTORY_API_KEY']
-
-    if not skip_configured_key:
         bearerToken = current_app.config['ARTIFACTORY_BEARER_TOKEN']
 
     if current_app.config['USE_GALAXY_KEY'] and (not current_app.config['PREFER_CONFIGURED_KEY'] or not apikey):
