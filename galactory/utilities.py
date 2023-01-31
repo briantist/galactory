@@ -252,6 +252,7 @@ def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: H
             name=ci["name"],
             version=ci["version"],
             dependencies=ci["dependencies"],
+            fqcn=f"{ci['namespace']}.{ci['name']}",
         )
         use_ci = abbrev_ci if current_app.config['ABBREVIATE_COLLECTION_INFO'] else ci
         props = {
