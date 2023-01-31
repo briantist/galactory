@@ -93,6 +93,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
     parser.add_argument('--cache-write', action=_StrBool, default=True, env_var='GALACTORY_CACHE_WRITE', help='Populate the upstream cache in Artifactory. Should be false when no API key is provided or the key has no permission to write.')
     parser.add_argument('--use-property-fallback', action='store_true', env_var='GALACTORY_USE_PROPERTY_FALLBACK', help='Set properties of an uploaded collection in a separate request after publshinng. Requires a Pro license of Artifactory. This feature is a workaround for an Artifactory proxy configuration error and may be removed in a future version.')
     parser.add_argument('--health-check-custom-text', type=str, default='', env_var='GALACTORY_HEALTH_CHECK_CUSTOM_TEXT', help='Sets custom_text field for health check endpoint responses.')
+    parser.add_argument('--abbreviate-collection-info', action='store_true', env_var='GALACTORY_ABBREVIATE_COLLECTION_INFO', help='Abbreviate collection_info.')
 
     if parse_known_only:
         args, _ = parser.parse_known_args()
@@ -118,6 +119,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
         CACHE_WRITE=args.cache_write,
         USE_PROPERTY_FALLBACK=args.use_property_fallback,
         HEALTH_CHECK_CUSTOM_TEXT=args.health_check_custom_text,
+        ABBREVIATE_COLLECTION_INFO=args.abbreviate_collection_info,
     )
 
     if proxy_fix:

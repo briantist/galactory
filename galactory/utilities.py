@@ -247,8 +247,15 @@ def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: H
         abort(Response("Error loading manifest from collection archive.", C.HTTP_INTERNAL_SERVER_ERROR))
     else:
         ci = manifest['collection_info']
+        abbrev_ci = dict(
+            namespace=ci["namespace"],
+            name=ci["name"],
+            version=ci["version"],
+            dependencies=ci["dependencies"],
+        )
+        use_ci = abbrev_ci if current_app.config['ABBREVIATE_COLLECTION_INFO'] else ci
         props = {
-            'collection_info': json.dumps(ci),
+            'collection_info': json.dumps(use_ci),
             'namespace': ci['namespace'],
             'name': ci['name'],
             'version': ci['version'],
