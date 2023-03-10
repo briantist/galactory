@@ -13,6 +13,7 @@ from datetime import datetime
 from tempfile import SpooledTemporaryFile
 from urllib.request import urlopen
 from urllib3 import Retry
+from urllib3.parse import quote
 from requests.adapters import HTTPAdapter
 from requests import Session
 
@@ -248,7 +249,7 @@ def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: H
     else:
         ci = manifest['collection_info']
         props = {
-            'collection_info': json.dumps(ci),
+            'collection_info': quote(json.dumps(ci)),
             'namespace': ci['namespace'],
             'name': ci['name'],
             'version': ci['version'],
