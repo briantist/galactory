@@ -13,7 +13,7 @@ from datetime import datetime
 from tempfile import SpooledTemporaryFile
 from urllib.request import urlopen
 from urllib3 import Retry
-from urllib3.parse import quote
+from urllib.parse import quote
 from requests.adapters import HTTPAdapter
 from requests import Session
 
