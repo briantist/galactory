@@ -160,7 +160,7 @@ jobs:
 
       - name: Publish to PyPI
         if: startsWith(github.ref, 'refs/tags/')
-        uses: pypa/gh-action-pypi-publish@c7f29f7adef1a245bd91520e94867e5c6eedddcc
+        uses: pypa/gh-action-pypi-publish@32b5e9370928566935e085a9154f23bd662ef41c
         with:
           user: __token__
           password: ${{ secrets.pypi }}
