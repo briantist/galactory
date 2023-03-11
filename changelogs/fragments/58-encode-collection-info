@@ -1,3 +1,3 @@
 ---
-minor_changes:
+bugfixes:
   - Encode special characters in ``collection_info`` when uploading collection file to artifactory to prevent truncation (https://github.com/briantist/galactory/issues/58).
