@@ -1,0 +1,6 @@
+---
+minor_changes:
+  - the minimum required version of ``dohq-artifactory`` is now ``v0.9.0`` (https://github.com/briantist/galactory/pull/72).
+
+bugfixes:
+  - traceback when publishing a collection whose metadata contains certain characters that need to be URL quoted (https://github.com/briantist/galactory/issues/58, https://github.com/briantist/galactory/issues/52).
