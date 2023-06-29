@@ -145,7 +145,7 @@ class ProxyUpstream:
             cache.update()
             json.dump(cache._to_serializable_dict(), buffer, default=DateTimeIsoFormatJSONProvider.default)
             buffer.seek(0)
-            path.deploy(buffer)
+            path.deploy(buffer, quote_parameters=True)
 
     @contextmanager
     def proxy_download(self, request):
