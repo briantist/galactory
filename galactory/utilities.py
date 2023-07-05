@@ -260,7 +260,14 @@ def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: H
         params = {}
 
     try:
-        artifact.deploy(tmpfile.handle, md5=tmpfile.md5, sha1=tmpfile.sha1, sha256=tmpfile.sha256, parameters=params)
+        artifact.deploy(
+            tmpfile.handle,
+            md5=tmpfile.md5,
+            sha1=tmpfile.sha1,
+            sha256=tmpfile.sha256,
+            parameters=params,
+            quote_parameters=True
+        )
     except ArtifactoryException as exc:
         cause = exc.__cause__
         current_app.logger.debug(cause)
