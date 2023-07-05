@@ -3,4 +3,7 @@ minor_changes:
   - the minimum required version of ``dohq-artifactory`` is now ``v0.9.0`` (https://github.com/briantist/galactory/pull/72).
 
 bugfixes:
-  - traceback when publishing a collection whose metadata contains certain characters that need to be URL quoted (https://github.com/briantist/galactory/issues/58, https://github.com/briantist/galactory/issues/52).
+  - traceback when publishing or retrieving a previously published collection (even by proxying) whose metadata contains certain characters that need to be URL quoted (https://github.com/briantist/galactory/issues/58, https://github.com/briantist/galactory/issues/52).
+
+known_issues:
+  - any collections already published with malformed metadata due to the bug in ``collection_info`` will not be fixed and will need to be re-published or have their collection info repaired (https://github.com/briantist/galactory/pull/72).
