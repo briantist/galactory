@@ -2,6 +2,7 @@
 # (c) 2022 Brian Scholer (@briantist)
 
 import logging
+import warnings
 
 from flask import Flask, request
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -72,8 +73,10 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
     parser.add_argument('--server-name', type=str, env_var='GALACTORY_SERVER_NAME', help='The host name and port of the server, as seen from clients. Used for generating links.')
     parser.add_argument('--preferred-url-scheme', type=str, env_var='GALACTORY_PREFERRED_URL_SCHEME', help='Sets the preferred scheme to use when constructing URLs. Defaults to the request scheme, but is unaware of reverse proxies.')
     parser.add_argument('--artifactory-path', type=str, required=True, env_var='GALACTORY_ARTIFACTORY_PATH', help='The URL of the path in Artifactory where collections are stored.')
-    parser.add_argument('--artifactory-api-key', type=str, env_var='GALACTORY_ARTIFACTORY_API_KEY', help='If set, is the API key used to access Artifactory.')
+    parser.add_argument('--artifactory-api-key', type=str, env_var='GALACTORY_ARTIFACTORY_API_KEY', help='If set, is the API key used to access Artifactory. If set with artifactory-access-token, this value will not be used.')
+    parser.add_argument('--artifactory-access-token', type=str, env_var='GALACTORY_ARTIFACTORY_ACCESS_TOKEN', help='If set, is the Access Token used to access Artifactory. If set with artifactory-api-key, this value will be used and the API key will be ignored.')
     parser.add_argument('--use-galaxy-key', action='store_true', env_var='GALACTORY_USE_GALAXY_KEY', help='If set, uses the Galaxy token as the Artifactory API key.')
+    parser.add_argument('--galaxy-auth-type', type=str, env_var='GALACTORY_GALAXY_AUTH_TYPE', choices=['api_key', 'access_token'], help='')
     parser.add_argument('--prefer-configured-key', action='store_true', env_var='GALACTORY_PREFER_CONFIGURED_KEY', help='If set, prefer the confgured Artifactory key over the Galaxy token.')
     parser.add_argument('--publish-skip-configured-key', action='store_true', env_var='GALACTORY_PUBLISH_SKIP_CONFIGURED_KEY', help='If set, publish endpoint will not use a configured key, only Galaxy token.')
     parser.add_argument('--log-file', type=str, env_var='GALACTORY_LOG_FILE', help='If set, logging will go to this file instead of the console.')
@@ -101,6 +104,18 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
 
     logging.basicConfig(filename=args.log_file, level=args.log_level)
 
+    # TODO: v0.11.0 - remove conditional & warning, set default on argument
+    if args.galaxy_auth_type is None and args.use_galaxy_key:
+        galaxy_auth_type = 'api_key'
+        warnings.warn(
+            message=(
+                "USE_GALAXY_AUTH is True but GALAXY_AUTH_TYPE is not set."
+                " The default value used will be 'api_key' for backward compatibility, but will change to 'access_token' in v0.11.0."
+                " To suppress this warning, set an explicit value."
+            ), category=FutureWarning, stacklevel=2)
+    else:
+        galaxy_auth_type = args.galaxy_auth_type
+
     app = create_app(
         ARTIFACTORY_PATH=ArtifactoryPath(args.artifactory_path),
         LOG_HEADERS=args.log_headers,
@@ -108,7 +123,9 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
         PROXY_UPSTREAM=args.proxy_upstream,
         NO_PROXY_NAMESPACES=args.no_proxy_namespace,
         ARTIFACTORY_API_KEY=args.artifactory_api_key,
+        ARTIFACTORY_ACCESS_TOKEN=args.artifactory_access_token,
         USE_GALAXY_KEY=args.use_galaxy_key,
+        GALAXY_AUTH_TYPE=galaxy_auth_type,
         PREFER_CONFIGURED_KEY=args.prefer_configured_key,
         PUBLISH_SKIP_CONFIGURED_KEY=args.publish_skip_configured_key,
         SERVER_NAME=args.server_name,
