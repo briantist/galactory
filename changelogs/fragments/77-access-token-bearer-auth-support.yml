@@ -6,3 +6,4 @@ deprecated_features:
   - The default value of the new ``GALAXY_AUTH_TYPE`` configuration option, added in this release, will change from ``api_key`` to ``access_token`` in ``v0.11.0`` (https://github.com/briantist/galactory/pull/77).
   - The ``PREFER_CONFIGURED_KEY`` configuration option has been replaced by ``PREFER_CONFIGURED_AUTH`` and the old name will be removed in ``v0.11.0`` (https://github.com/briantist/galactory/pull/77).
   - The ``USE_GALAXY_KEY`` configuration option has been replaced by ``USE_GALAXY_AUTH`` and the old name will be removed in ``v0.11.0`` (https://github.com/briantist/galactory/pull/77).
+  - The ``PUBLISH_SKIP_CONFIGURED_KEY`` configuration option has been replaced by ``PUBLISH_SKIP_CONFIGURED_AUTH`` and the old name will be removed in ``v0.11.0`` (https://github.com/briantist/galactory/pull/77).
