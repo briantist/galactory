@@ -96,7 +96,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
     parser.add_argument('-npns', '--no-proxy-namespace', action='append', default=[], env_var='GALACTORY_NO_PROXY_NAMESPACE', help='Requests for this namespace should never be proxied. Can be specified multiple times.')
     parser.add_argument('--cache-minutes', default=60, type=int, env_var='GALACTORY_CACHE_MINUTES', help='The time period that a cache entry should be considered valid.')
     parser.add_argument('--cache-read', action=_StrBool, default=True, env_var='GALACTORY_CACHE_READ', help='Look for upsteam caches and use their values.')
-    parser.add_argument('--cache-write', action=_StrBool, default=True, env_var='GALACTORY_CACHE_WRITE', help='Populate the upstream cache in Artifactory. Should be false when no API key is provided or the key has no permission to write.')
+    parser.add_argument('--cache-write', action=_StrBool, default=True, env_var='GALACTORY_CACHE_WRITE', help='Populate the upstream cache in Artifactory. Should be false when no auth is provided or the auth has no permission to write.')
     parser.add_argument('--use-property-fallback', action='store_true', env_var='GALACTORY_USE_PROPERTY_FALLBACK', help='Set properties of an uploaded collection in a separate request after publshinng. Requires a Pro license of Artifactory. This feature is a workaround for an Artifactory proxy configuration error and may be removed in a future version.')
     parser.add_argument('--health-check-custom-text', type=str, default='', env_var='GALACTORY_HEALTH_CHECK_CUSTOM_TEXT', help='Sets custom_text field for health check endpoint responses.')
 
