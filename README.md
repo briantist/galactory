@@ -11,7 +11,7 @@ It can also be set up to transparently proxy an upstream Galaxy server, storing 
 This project is _heavily_ inspired by [amanda](https://github.com/sivel/amanda/).
 
 # Artifactory compatibility
-For the time being some features may require an Artifactory Pro license. Work is being done to workaround the (many) limitations that JFrog has placed on API calls. [These limitations have also complicated the ability to run integration tests](https://github.com/briantist/galactory/issues/6). As a result, the test of whether all Pro license dependent API calls have been rooted out, will be whether test coverage exists that can run against Artifactory OSS.
+All features of galactory should work with the free-of-cost Artifactory OSS. Please report any usage that appears to require a Pro license.
 
 # How to use
 There isn't any proper documentation yet. The help output is below.
