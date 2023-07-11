@@ -76,6 +76,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
     parser.add_argument('--artifactory-api-key', type=str, env_var='GALACTORY_ARTIFACTORY_API_KEY', help='If set, is the API key used to access Artifactory. If set with artifactory-access-token, this value will not be used.')
     parser.add_argument('--artifactory-access-token', type=str, env_var='GALACTORY_ARTIFACTORY_ACCESS_TOKEN', help='If set, is the Access Token used to access Artifactory. If set with artifactory-api-key, this value will be used and the API key will be ignored.')
     parser.add_argument('--use-galaxy-key', action='store_true', env_var='GALACTORY_USE_GALAXY_KEY', help='If set, uses the Galaxy token as the Artifactory API key.')
+    parser.add_argument('--use-galaxy-auth', action='store_true', env_var='GALACTORY_USE_GALAXY_AUTH', help='If set, uses the Galaxy token as the Artifactory API key. DEPRECATED: This option will be removed in v0.11.0. Please use --use-galaxy-auth going forward.')
     parser.add_argument('--galaxy-auth-type', type=str, env_var='GALACTORY_GALAXY_AUTH_TYPE', choices=['api_key', 'access_token'], help='')
     parser.add_argument('--prefer-configured-key', action='store_true', env_var='GALACTORY_PREFER_CONFIGURED_KEY', help='If set, prefer the confgured Artifactory auth over the Galaxy token. DEPRECATED: This option will be removed in v0.11.0. Please use --prefer-configured-auth going forward.')
     parser.add_argument('--prefer-configured-auth', action='store_true', env_var='GALACTORY_PREFER_CONFIGURED_AUTH', help='If set, prefer the confgured Artifactory auth over the Galaxy token.')
@@ -105,8 +106,20 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
 
     logging.basicConfig(filename=args.log_file, level=args.log_level)
 
+    # TODO: v0.11.0 - remove conditional old name
+    if args.use_galaxy_key and not args.use_galaxy_auth:
+        use_galaxy_auth = True
+        warnings.warn(
+            message=(
+                "USE_GALAXY_KEY has been replaced by USE_GALAXY_AUTH and the old name will be removed in v0.11.0."
+                " To suppress this warning, set USE_GALAXY_AUTH."
+            ), category=DeprecationWarning, stacklevel=2
+        )
+    else:
+        use_galaxy_auth = args.use_galaxy_auth
+
     # TODO: v0.11.0 - remove conditional & warning, set default on argument
-    if args.galaxy_auth_type is None and args.use_galaxy_key:
+    if args.galaxy_auth_type is None and use_galaxy_auth:
         galaxy_auth_type = 'api_key'
         warnings.warn(
             message=(
@@ -138,7 +151,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
         NO_PROXY_NAMESPACES=args.no_proxy_namespace,
         ARTIFACTORY_API_KEY=args.artifactory_api_key,
         ARTIFACTORY_ACCESS_TOKEN=args.artifactory_access_token,
-        USE_GALAXY_KEY=args.use_galaxy_key,
+        USE_GALAXY_AUTH=use_galaxy_auth,
         GALAXY_AUTH_TYPE=galaxy_auth_type,
         PREFER_CONFIGURED_KEY=prefer_configured_auth,
         PUBLISH_SKIP_CONFIGURED_KEY=args.publish_skip_configured_key,

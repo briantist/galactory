@@ -58,7 +58,7 @@ def authorize(request: Request, artifactory_path: ArtifactoryPath, retry=None, s
         elif apikey is not None:
             auth = XJFrogArtApiAuth(apikey)
 
-    if current_app.config['USE_GALAXY_KEY'] and (not current_app.config['PREFER_CONFIGURED_KEY'] or auth is None):
+    if current_app.config['USE_GALAXY_AUTH'] and (not current_app.config['PREFER_CONFIGURED_KEY'] or auth is None):
         galaxy_auth_type = current_app.config['GALAXY_AUTH_TYPE']
         authorization = request.headers.get('Authorization')
         if authorization:
