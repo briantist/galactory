@@ -48,9 +48,9 @@ def _session_with_retries(retry=None, auth=None) -> Session:
     return session
 
 
-def authorize(request: Request, artifactory_path: ArtifactoryPath, retry=None, skip_configured_key: bool = False) -> ArtifactoryPath:
+def authorize(request: Request, artifactory_path: ArtifactoryPath, retry=None, skip_configured_auth: bool = False) -> ArtifactoryPath:
     auth = None
-    if not skip_configured_key:
+    if not skip_configured_auth:
         accesstoken = current_app.config['ARTIFACTORY_ACCESS_TOKEN']
         apikey = current_app.config['ARTIFACTORY_API_KEY']
         if accesstoken is not None:
