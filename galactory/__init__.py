@@ -153,7 +153,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
         ARTIFACTORY_ACCESS_TOKEN=args.artifactory_access_token,
         USE_GALAXY_AUTH=use_galaxy_auth,
         GALAXY_AUTH_TYPE=galaxy_auth_type,
-        PREFER_CONFIGURED_KEY=prefer_configured_auth,
+        PREFER_CONFIGURED_AUTH=prefer_configured_auth,
         PUBLISH_SKIP_CONFIGURED_KEY=args.publish_skip_configured_key,
         SERVER_NAME=args.server_name,
         PREFERRED_URL_SCHEME=args.preferred_url_scheme,
