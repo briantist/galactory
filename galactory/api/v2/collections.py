@@ -174,11 +174,11 @@ def version(namespace, collection, version):
 def publish():
     sha256 = request.form['sha256']
     file = request.files['file']
-    skip_configured_key = current_app.config['PUBLISH_SKIP_CONFIGURED_KEY']
+    skip_configured_auth = current_app.config['PUBLISH_SKIP_CONFIGURED_AUTH']
     property_fallback = current_app.config.get('USE_PROPERTY_FALLBACK', False)
     _scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
-    target = authorize(request, current_app.config['ARTIFACTORY_PATH'] / file.filename, skip_configured_key=skip_configured_key)
+    target = authorize(request, current_app.config['ARTIFACTORY_PATH'] / file.filename, skip_configured_auth=skip_configured_auth)
 
     with _chunk_to_temp(Base64IO(file)) as tmp:
         if tmp.sha256 != sha256:

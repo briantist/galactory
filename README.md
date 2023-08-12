@@ -11,7 +11,7 @@ It can also be set up to transparently proxy an upstream Galaxy server, storing 
 This project is _heavily_ inspired by [amanda](https://github.com/sivel/amanda/).
 
 # Artifactory compatibility
-For the time being some features may require an Artifactory Pro license. Work is being done to workaround the (many) limitations that JFrog has placed on API calls. [These limitations have also complicated the ability to run integration tests](https://github.com/briantist/galactory/issues/6). As a result, the test of whether all Pro license dependent API calls have been rooted out, will be whether test coverage exists that can run against Artifactory OSS.
+All features of galactory should work with the free-of-cost Artifactory OSS. Please report any usage that appears to require a Pro license.
 
 # How to use
 There isn't any proper documentation yet. The help output is below.
@@ -33,9 +33,12 @@ usage: python -m galactory [-h] [-c CONFIG] [--listen-addr LISTEN_ADDR]
                            [--listen-port LISTEN_PORT] [--server-name SERVER_NAME]
                            [--preferred-url-scheme PREFERRED_URL_SCHEME]
                            --artifactory-path ARTIFACTORY_PATH
-                           [--artifactory-api-key ARTIFACTORY_API_KEY] [--use-galaxy-key]
-                           [--prefer-configured-key] [--publish-skip-configured-key]
-                           [--log-file LOG_FILE]
+                           [--artifactory-api-key ARTIFACTORY_API_KEY]
+                           [--artifactory-access-token ARTIFACTORY_ACCESS_TOKEN]
+                           [--use-galaxy-key] [--use-galaxy-auth]
+                           [--galaxy-auth-type {api_key,access_token}] [--prefer-configured-key]
+                           [--prefer-configured-auth] [--publish-skip-configured-key]
+                           [--publish-skip-configured-auth] [--log-file LOG_FILE]
                            [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--log-headers]
                            [--log-body] [--proxy-upstream PROXY_UPSTREAM]
                            [-npns NO_PROXY_NAMESPACE] [--cache-minutes CACHE_MINUTES]
@@ -65,16 +68,39 @@ optional arguments:
                         The URL of the path in Artifactory where collections are stored.
                         [env var: GALACTORY_ARTIFACTORY_PATH]
   --artifactory-api-key ARTIFACTORY_API_KEY
-                        If set, is the API key used to access Artifactory.
+                        If set, is the API key used to access Artifactory. If set with artifactory-access-token, this
+                        value will not be used.
                         [env var: GALACTORY_ARTIFACTORY_API_KEY]
-  --use-galaxy-key      If set, uses the Galaxy token as the Artifactory API key.
+  --artifactory-access-token ARTIFACTORY_ACCESS_TOKEN
+                        If set, is the Access Token used to access Artifactory. If set with artifactory-api-key, this
+                        value will be used and the API key will be ignored.
+                        [env var: GALACTORY_ARTIFACTORY_ACCESS_TOKEN]
+  --use-galaxy-key      If set, uses the Galaxy token sent in the request as the Artifactory auth. DEPRECATED: This
+                        option will be removed in v0.11.0. Please use --use-galaxy-auth going forward.
                         [env var: GALACTORY_USE_GALAXY_KEY]
+  --use-galaxy-auth     If set, uses the Galaxy token sent in the request as the Artifactory auth.
+                        [env var: GALACTORY_USE_GALAXY_AUTH]
+  --galaxy-auth-type {api_key,access_token}
+                        Auth received via a Galaxy request should be interpreted as this type of auth.
+                        [env var: GALACTORY_GALAXY_AUTH_TYPE]
   --prefer-configured-key
-                        If set, prefer the confgured Artifactory key over the Galaxy token.
+                        If set, prefer the confgured Artifactory auth over the Galaxy token.
+                        DEPRECATED: This option will be removed in v0.11.0.
+                        Please use --prefer-configured-auth going forward.
                         [env var: GALACTORY_PREFER_CONFIGURED_KEY]
- --publish-skip-configured-key
-                        If set, publish endpoint will not use a configured key, only Galaxy token.
+  --prefer-configured-auth
+                        If set, prefer the confgured Artifactory auth over the Galaxy token.
+                        [env var: GALACTORY_PREFER_CONFIGURED_AUTH]
+  --publish-skip-configured-key
+                        If set, publish endpoint will not use configured auth, only auth included in a Galaxy
+                        request.
+                        DEPRECATED: This option will be removed in v0.11.0.
+                        Please use --publish-skip-configured-auth going forward.
                         [env var: GALACTORY_PUBLISH_SKIP_CONFIGURED_KEY]
+  --publish-skip-configured-auth
+                        If set, publish endpoint will not use configured auth, only auth included in a Galaxy
+                        request.
+                        [env var: GALACTORY_PUBLISH_SKIP_CONFIGURED_AUTH]
   --log-file LOG_FILE   If set, logging will go to this file instead of the console.
                         [env var: GALACTORY_LOG_FILE]
   --log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}
@@ -96,8 +122,8 @@ optional arguments:
                         Look for upsteam caches and use their values.
                         [env var: GALACTORY_CACHE_READ]
   --cache-write CACHE_WRITE
-                        Populate the upstream cache in Artifactory. Should be false when no API key is
-                        provided or the key has no permission to write.
+                        Populate the upstream cache in Artifactory. Should be false when no auth is
+                        provided or the auth has no permission to write.
                         [env var: GALACTORY_CACHE_WRITE]
   --use-property-fallback
                         Set properties of an uploaded collection in a separate request after publshinng.
