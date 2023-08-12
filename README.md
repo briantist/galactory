@@ -31,8 +31,9 @@ Pulling out this bit about configuration for emphasis:
 ```text
 usage: python -m galactory [-h] [-c CONFIG] [--listen-addr LISTEN_ADDR]
                            [--listen-port LISTEN_PORT] [--server-name SERVER_NAME]
-                           [--preferred-url-scheme PREFERRED_URL_SCHEME] --artifactory-path
-                           ARTIFACTORY_PATH [--artifactory-api-key ARTIFACTORY_API_KEY]
+                           [--preferred-url-scheme PREFERRED_URL_SCHEME]
+                           --artifactory-path ARTIFACTORY_PATH
+                           [--artifactory-api-key ARTIFACTORY_API_KEY]
                            [--artifactory-access-token ARTIFACTORY_ACCESS_TOKEN]
                            [--use-galaxy-key] [--use-galaxy-auth]
                            [--galaxy-auth-type {api_key,access_token}] [--prefer-configured-key]
