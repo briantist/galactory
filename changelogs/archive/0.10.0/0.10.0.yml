@@ -1,0 +1,3 @@
+---
+release_summary: |-
+  This release adds support for Artifactory Access Tokens (bearer auth), and fixes a bug that resulted in malformed collection metadata.
