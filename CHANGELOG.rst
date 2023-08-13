@@ -5,6 +5,38 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.10.0
+=======
+
+Release Summary
+---------------
+
+This release adds support for Artifactory Access Tokens (bearer auth), and fixes a bug that resulted in malformed collection metadata.
+
+Minor Changes
+-------------
+
+- Add support for Artifactory Access Tokens (bearer auth) in both configured auth and galaxy requests, via the new ``ARTIFACTORY_ACCESS_TOKEN`` and ``GALAXY_AUTH_TYPE`` configuration options (https://github.com/briantist/galactory/pull/77).
+- the minimum required version of ``dohq-artifactory`` is now ``v0.9.0`` (https://github.com/briantist/galactory/pull/72).
+
+Deprecated Features
+-------------------
+
+- The ``PREFER_CONFIGURED_KEY`` configuration option has been replaced by ``PREFER_CONFIGURED_AUTH`` and the old name will be removed in ``v0.11.0`` (https://github.com/briantist/galactory/pull/77).
+- The ``PUBLISH_SKIP_CONFIGURED_KEY`` configuration option has been replaced by ``PUBLISH_SKIP_CONFIGURED_AUTH`` and the old name will be removed in ``v0.11.0`` (https://github.com/briantist/galactory/pull/77).
+- The ``USE_GALAXY_KEY`` configuration option has been replaced by ``USE_GALAXY_AUTH`` and the old name will be removed in ``v0.11.0`` (https://github.com/briantist/galactory/pull/77).
+- The default value of the new ``GALAXY_AUTH_TYPE`` configuration option, added in this release, will change from ``api_key`` to ``access_token`` in ``v0.11.0`` (https://github.com/briantist/galactory/pull/77).
+
+Bugfixes
+--------
+
+- traceback when publishing or retrieving a previously published collection (even by proxying) whose metadata contains certain characters that need to be URL quoted (https://github.com/briantist/galactory/issues/58, https://github.com/briantist/galactory/issues/52).
+
+Known Issues
+------------
+
+- any collections already published with malformed metadata due to the bug in ``collection_info`` will not be fixed and will need to be re-published or have their collection info repaired (https://github.com/briantist/galactory/pull/72).
+
 v0.9.0
 ======
 
