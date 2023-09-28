@@ -28,7 +28,7 @@ jobs:
       branch: ${{ steps.setvars.outputs.branch }}
       changelogver: ${{ steps.setvars.outputs.changelogver }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v4
         with:
@@ -61,7 +61,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -136,7 +136,7 @@ jobs:
     env:
       UPSTREAM: ghcr.io/${{ github.repository_owner }}/galactory
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
