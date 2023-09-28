@@ -25,8 +25,8 @@ def test_discover_collections_skip_missing_version(repository, props):
 
 
 @pytest.mark.parametrize('namespace', [None, 'community', 'briantist', 'fake'])
-@pytest.mark.parametrize('collection', [None, 'whatever', 'hashi_vault', 'fake'])
-@pytest.mark.parametrize('version', [None, '2.5.0', '3.0.0', '0.1.0', '0.2.0', '0.0.0'])
+@pytest.mark.parametrize('collection', [None, 'whatever', 'hashi_vault', 'devel', 'fake'])
+@pytest.mark.parametrize('version', [None, '2.5.0', '3.0.0', '0.1.0', '0.2.0', '0.0.0', '0.1.0-dev0', '0.1.0-dev1', '0.2.0-dev0'])
 def test_discover_collections_any(repository, manifest_loader, namespace, collection, version, app_request_context):
     gen = discover_collections(repository, namespace, collection, version)
 
