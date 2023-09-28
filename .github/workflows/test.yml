@@ -53,7 +53,7 @@ jobs:
           echo "changelogver=v${VER_TAG//\./-}" >> $GITHUB_OUTPUT
 
       - name: Coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v3
 
   build:
     needs: [test]
