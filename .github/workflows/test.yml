@@ -61,6 +61,8 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
+    outputs:
+      container-description: ${{ steps.description.outputs.container-description }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -83,6 +85,11 @@ jobs:
 
       - name: Run container
         run: docker run --rm galactory --help
+
+      - name: Extract container description
+        id: description
+        run: |
+          echo "container-description=$(docker inspect --format '{{ index .Config.Labels "org.opencontainers.image.description" }}' galactory) >> $GITHUB_OUTPUT
 
       - name: Build arm64
         uses: docker/build-push-action@v5
@@ -159,9 +166,12 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           context: .
           platforms: linux/amd64,linux/arm64
+          labels: |
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
           tags: |
             ${{ env.UPSTREAM }}:${{ startsWith(github.ref, 'refs/tags/') && 'latest' || needs.test.outputs.branch }}
             ${{ env.UPSTREAM }}:${{ startsWith(github.ref, 'refs/tags/') && needs.test.outputs.relver || github.sha }}
+          outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=${{ needs.build.outputs.container-description }}
 
   pypi_release:
     needs: [test, build]
