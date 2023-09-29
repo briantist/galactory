@@ -158,18 +158,15 @@ def collected_collections(repo, namespace=None, name=None, scheme=None):
 
     for c in discover_collections(repo, namespace=namespace, name=name, scheme=scheme):
         version = c['version']
-        ver = c['semver']
         col = collections.setdefault(c['fqcn'], {})
         versions = col.setdefault('versions', {})
         versions[version] = c
-        if not ver.prerelease:
-            try:
-                latest = col['latest']
-            except KeyError:
-                col['latest'] = c
-            else:
-                if ver > latest['semver']:
-                    col['latest'] = c
+        try:
+            latest = col['latest']
+        except KeyError:
+            col['latest'] = c
+        else:
+            col['latest'] = _latest_collection_version(latest, c)
 
     return collections
 
