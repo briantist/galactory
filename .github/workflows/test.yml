@@ -89,7 +89,8 @@ jobs:
       - name: Extract container description
         id: description
         run: |
-          echo "container-description=$(docker inspect --format '{{ index .Config.Labels "org.opencontainers.image.description" }}' galactory) >> $GITHUB_OUTPUT
+          DESC=$(docker inspect --format '{{ index .Config.Labels "org.opencontainers.image.description" }}' galactory)
+          echo "container-description=$DESC" >> $GITHUB_OUTPUT
 
       - name: Build arm64
         uses: docker/build-push-action@v5
