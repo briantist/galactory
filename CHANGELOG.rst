@@ -5,6 +5,14 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.10.1
+=======
+
+Bugfixes
+--------
+
+- A collection that had only prereleases would cause a 500 error when visiting certain endpoints due to a lack of a ``latest_version`` key. The latest version is now the latest stable (non-prerelease) version if any exist, which is the same behavior as before, but if only prereleases exist, then ``latest_version`` will refer to the latest prerelease (https://github.com/briantist/galactory/issues/87).
+
 v0.10.0
 =======
 
