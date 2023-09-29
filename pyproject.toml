@@ -1,6 +1,6 @@
 [project]
 name = "galactory"
-version = "0.10.1-dev0"
+version = "0.10.1"
 authors = [
     {name = "Brian Scholer"},
 ]
