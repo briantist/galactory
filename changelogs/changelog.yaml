@@ -39,6 +39,17 @@ releases:
     - 72-fix-url-quoting.yml
     - 77-access-token-bearer-auth-support.yml
     release_date: '2023-08-12'
+  0.10.1:
+    changes:
+      bugfixes:
+      - A collection that had only prereleases would cause a 500 error when visiting
+        certain endpoints due to a lack of a ``latest_version`` key. The latest version
+        is now the latest stable (non-prerelease) version if any exist, which is the
+        same behavior as before, but if only prereleases exist, then ``latest_version``
+        will refer to the latest prerelease (https://github.com/briantist/galactory/issues/87).
+    fragments:
+    - 88-prereleases.yml
+    release_date: '2023-09-29'
   0.2.0:
     changes:
       minor_changes:
