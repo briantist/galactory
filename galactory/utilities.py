@@ -145,23 +145,28 @@ def discover_collections(repo, namespace=None, name=None, version=None, fast_det
             yield coldata
 
 
+def _latest_collection_version(reference_collection: dict, difference_collection: dict, *, property: str = "semver"):
+    """Returns the latest of two collections."""
+    if (reference_collection[property].prerelease is None) == (difference_collection[property].prerelease is None):
+        return max(reference_collection, difference_collection, key=lambda x: x[property])
+
+    return reference_collection if reference_collection[property].prerelease is None else difference_collection
+
+
 def collected_collections(repo, namespace=None, name=None, scheme=None):
     collections = {}
 
     for c in discover_collections(repo, namespace=namespace, name=name, scheme=scheme):
         version = c['version']
-        ver = c['semver']
         col = collections.setdefault(c['fqcn'], {})
         versions = col.setdefault('versions', {})
         versions[version] = c
-        if not ver.prerelease:
-            try:
-                latest = col['latest']
-            except KeyError:
-                col['latest'] = c
-            else:
-                if ver > latest['semver']:
-                    col['latest'] = c
+        try:
+            latest = col['latest']
+        except KeyError:
+            col['latest'] = c
+        else:
+            col['latest'] = _latest_collection_version(latest, c)
 
     return collections
 

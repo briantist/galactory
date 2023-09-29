@@ -25,7 +25,7 @@ def test_collected_collections_skip_missing_version(repository, props):
 
 
 @pytest.mark.parametrize('namespace', [None, 'community', 'briantist', 'fake'])
-@pytest.mark.parametrize('collection', [None, 'whatever', 'hashi_vault', 'fake'])
+@pytest.mark.parametrize('collection', [None, 'whatever', 'hashi_vault', 'fake', 'devel'])
 @pytest.mark.parametrize('scheme', [None, '', 'https'])
 def test_collected_collections_any(repository, discover_collections, namespace, collection, scheme, app_request_context):
     fqcn = None if any([namespace is None, collection is None]) else f"{namespace}.{collection}"
@@ -60,5 +60,25 @@ def test_collected_collections_any(repository, discover_collections, namespace, 
             cols += 1
             ver = next(discover_collections(repository, namespace=vd['namespace']['name'], name=vd['name'], version=v, scheme=scheme))
             assert ver == vd
+
+    assert cols <= len(contents)
+
+@pytest.mark.parametrize('namespace', ['briantist'])
+@pytest.mark.parametrize('collection', ['devel'])
+def test_collected_collections_pre_only(repository, discover_collections, namespace, collection, app_request_context):
+    collections = collected_collections(repository, namespace, collection)
+
+    contents = list(repository)
+
+    cols = 0
+
+    for col, data in collections.items():
+        assert col == f"{namespace}.{collection}"
+        assert 'versions' in data
+        assert 'latest' in data
+        assert data['latest']['version'] == '0.1.0-dev1'
+
+        for v, vd in data['versions'].items():
+            cols += 1
 
     assert cols <= len(contents)
