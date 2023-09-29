@@ -49,9 +49,9 @@ jobs:
         id: setvars
         run: |
           VER_TAG=${GITHUB_REF/refs\/tags\/v/}
-          echo "relver=${VER_TAG}" >> $GITHUB_OUTPUT
-          echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
-          echo "changelogver=v${VER_TAG//\./-}" >> $GITHUB_OUTPUT
+          echo "relver=${VER_TAG}" | tee --append $GITHUB_OUTPUT
+          echo "branch=${GITHUB_REF#refs/heads/}" | tee --append $GITHUB_OUTPUT
+          echo "changelogver=v${VER_TAG//\./-}" | tee --append $GITHUB_OUTPUT
 
       - name: Coverage
         uses: codecov/codecov-action@v3
@@ -90,7 +90,7 @@ jobs:
         id: description
         run: |
           DESC=$(docker inspect --format '{{ index .Config.Labels "org.opencontainers.image.description" }}' galactory)
-          echo "container-description=$DESC" >> $GITHUB_OUTPUT
+          echo "container-description=$DESC" | tee --append $GITHUB_OUTPUT
 
       - name: Build arm64
         uses: docker/build-push-action@v5
