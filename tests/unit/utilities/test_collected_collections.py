@@ -80,7 +80,5 @@ def test_collected_collections_pre_only(repository, discover_collections, namesp
 
         for v, vd in data['versions'].items():
             cols += 1
-            # ver = next(discover_collections(repository, namespace=vd['namespace']['name'], name=vd['name'], version=v, scheme=scheme))
-            # assert ver == vd
 
     assert cols <= len(contents)
