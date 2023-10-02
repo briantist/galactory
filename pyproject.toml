@@ -29,7 +29,7 @@ requires-python = ">=3.8"
 
 dependencies = [
     "dohq-artifactory>=0.9,<0.10",
-    "Flask>=2.1,<3",
+    "Flask>=2.1,<4",
     "semver>=2,<4",
     "base64io>=1,<2",
     "ConfigArgParse>=1.5,<2",
