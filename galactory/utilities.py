@@ -2,7 +2,6 @@
 # (c) 2022 Brian Scholer (@briantist)
 
 import json
-import semver
 import math
 import hashlib
 import gzip
@@ -11,12 +10,11 @@ import typing as t
 
 from datetime import datetime
 from tempfile import SpooledTemporaryFile
-from urllib.request import urlopen
 from urllib3 import Retry
 from requests.adapters import HTTPAdapter
 from requests import Session
 
-from flask import url_for, request, current_app, abort, Response, Request
+from flask import current_app, abort, Response, Request
 from flask.json.provider import DefaultJSONProvider
 from artifactory import ArtifactoryPath, ArtifactoryException
 from dohq_artifactory.auth import XJFrogArtApiAuth, XJFrogArtBearerAuth
@@ -33,7 +31,6 @@ class DateTimeIsoFormatJSONProvider(DefaultJSONProvider):
             return o.isoformat()
 
         return super().default(o)
-
 
 
 def _session_with_retries(retry=None, auth=None) -> Session:
@@ -129,70 +126,6 @@ def discover_collections(
             )
         ):
             yield coldata
-
-
-def _latest_collection_version(reference_collection: dict, difference_collection: dict, *, property: str = "semver"):
-    """Returns the latest of two collections."""
-    if (reference_collection[property].prerelease is None) == (difference_collection[property].prerelease is None):
-        return max(reference_collection, difference_collection, key=lambda x: x[property])
-
-    return reference_collection if reference_collection[property].prerelease is None else difference_collection
-
-
-def collected_collections(repo, namespace=None, name=None, scheme=None):
-    collections = {}
-
-    for c in discover_collections(repo, namespace=namespace, name=name, scheme=scheme):
-        version = c['version']
-        col = collections.setdefault(c['fqcn'], {})
-        versions = col.setdefault('versions', {})
-        versions[version] = c
-        try:
-            latest = col['latest']
-        except KeyError:
-            col['latest'] = c
-        else:
-            col['latest'] = _latest_collection_version(latest, c)
-
-    return collections
-
-
-def _collection_listing(repo, namespace=None, collection=None, scheme=None):
-    collections = collected_collections(repo, namespace, collection)
-
-    results = []
-
-    for _, i in collections.items():
-        latest = i['latest']
-
-        result = {
-            'href': url_for(request.endpoint, _external=True, _scheme=scheme, **request.view_args),
-            'name': latest['name'],
-            'namespace': latest['namespace'],
-            'created': latest['created'],
-            'modified': latest['modified'],
-            'versions_url': url_for(
-                'api.v2.versions',
-                namespace=latest['namespace']['name'],
-                collection=latest['name'],
-                _external=True,
-                _scheme=scheme,
-            ),
-            'latest_version': {
-                'href': url_for(
-                    'api.v2.version',
-                    namespace=latest['namespace']['name'],
-                    collection=latest['name'],
-                    version=latest['version'],
-                    _external=True,
-                    _scheme=scheme,
-                ),
-                "version": latest['version'],
-            }
-        }
-        results.append(result)
-
-    return results
 
 
 def lcm(a, b, *more):
