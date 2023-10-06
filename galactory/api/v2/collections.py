@@ -206,7 +206,7 @@ def versions(namespace, collection):
 
 
 @v2.route('/collections/<namespace>/<collection>/versions/<version>')
-@v2.route('/collections/<namespace>/<collection>/versions/<version>/')
+@v2.route('/collections/<namespace>/<collection>/versions/<version>/', endpoint='version')
 def version(namespace, collection, version):
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
     upstream = current_app.config['PROXY_UPSTREAM']
@@ -222,35 +222,48 @@ def version(namespace, collection, version):
         if upstream and (not no_proxy or namespace not in no_proxy):
             proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
             upstream_result = proxy.proxy(request)
-            return jsonify(upstream_result)
+            return upstream_result
         else:
             abort(C.HTTP_NOT_FOUND)
 
     out = {
         'artifact': {
-            'filename': info['filename'],
-            'sha256': info['sha256'],
-            'size': info['size'],
+            'filename': info.filename,
+            'sha256': info.sha256,
+            'size': info.size,
         },
         'collection': {
             'href': url_for(
-                'api.v2.collection',
-                namespace=namespace,
-                collection=collection,
+                f"{request.blueprint}.collection",
+                namespace=info.namespace,
+                collection=info.name,
                 _external=True,
                 _scheme=scheme,
             ),
-            'name': info['name'],
+            'name': info.name,
         },
-        'namespace': info['namespace'],
-        'download_url': info['download_url'],
+        'namespace': {
+            'name': info.namespace,
+        },
+        'download_url': url_for(
+            'download.download',
+            filename=info.filename,
+            _external=True,
+            _scheme=scheme,
+        ),
         'hidden': False,
-        'href': url_for(request.endpoint, _external=True, _scheme=scheme, **request.view_args),
+        'href': url_for(
+            f"{request.blueprint}.collection",
+            namespace=info.namespace,
+            collection=info.name,
+            _external=True,
+            _scheme=scheme
+        ),
         'id': 0,
-        'metadata': info['collection_info'],
-        'version': version,
+        'metadata': info.collection_info,
+        'version': info.version,
     }
-    return jsonify(out)
+    return out
 
 
 @v2.route('/collections', methods=['POST'])
