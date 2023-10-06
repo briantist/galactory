@@ -16,16 +16,56 @@ from ...utilities import (
     upload_collection_from_hashed_tempfile,
 )
 from ...upstream import ProxyUpstream
+from ...models import CollectionCollection
 
 
 @v2.route('/collections')
-@v2.route('/collections/')
+@v2.route('/collections/', endpoint='collections')
 def collections():
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
     scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
-    results = _collection_listing(repo=repository, scheme=scheme)
-    return jsonify(results=results)
+    results = []
+    colcol = CollectionCollection.from_collections(discover_collections(repo=repository, scheme=scheme))
+
+    for colgroup in colcol.values():
+        result = {
+            'href': url_for(
+                f"{request.blueprint}.collection",
+                namespace=colgroup.namespace,
+                collection=colgroup.name,
+                _external=True,
+                _scheme=scheme
+            ),
+            'name': colgroup.name,
+            'namespace': {
+                'name': colgroup.namespace,
+            },
+            'deprecated': False, # FIXME
+            'created': colgroup.latest.created,
+            'modified': colgroup.latest.modified,
+            'versions_url': url_for(
+                f"{request.blueprint}.versions",
+                namespace=colgroup.latest.namespace,
+                collection=colgroup.latest.name,
+                _external=True,
+                _scheme=scheme,
+            ),
+            'latest_version': {
+                'href': url_for(
+                    f"{request.blueprint}.version",
+                    namespace=colgroup.latest.namespace,
+                    collection=colgroup.latest.name,
+                    version=colgroup.latest.version,
+                    _external=True,
+                    _scheme=scheme,
+                ),
+                "version": colgroup.latest.version,
+            },
+        }
+        results.append(result)
+
+    return jsonify(count=len(results), results=results, next=None, next_link=None, previous=None, previous_link=None)
 
 
 @v2.route('/collections/<namespace>/<collection>')
