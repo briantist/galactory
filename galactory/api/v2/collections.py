@@ -24,7 +24,7 @@ def collections():
     scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
     results = []
-    colcol = CollectionCollection.from_collections(discover_collections(repo=repository, scheme=scheme))
+    colcol = CollectionCollection.from_collections(discover_collections(repo=repository))
 
     for colgroup in colcol.values():
         result = {
@@ -82,7 +82,7 @@ def collection(namespace, collection):
         proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
         upstream_result = proxy.proxy(request)
 
-    colcol = CollectionCollection.from_collections(discover_collections(repo=repository, namespace=namespace, name=collection, scheme=scheme))
+    colcol = CollectionCollection.from_collections(discover_collections(repo=repository, namespace=namespace, name=collection))
 
 
     if not (colcol or upstream_result):
@@ -161,7 +161,7 @@ def versions(namespace, collection):
         proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
         upstream_result = proxy.proxy(request)
 
-    collections = CollectionCollection.from_collections(discover_collections(repo=repository, namespace=namespace, name=collection, scheme=scheme))
+    collections = CollectionCollection.from_collections(discover_collections(repo=repository, namespace=namespace, name=collection))
 
     if not (collections or upstream_result):
         abort(C.HTTP_NOT_FOUND)
@@ -215,7 +215,7 @@ def version(namespace, collection, version):
     scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
     try:
-        info = next(discover_collections(repository, namespace=namespace, name=collection, version=version, scheme=scheme))
+        info = next(discover_collections(repository, namespace=namespace, name=collection, version=version))
     except StopIteration:
         if upstream and (not no_proxy or namespace not in no_proxy):
             proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
