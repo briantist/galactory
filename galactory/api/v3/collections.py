@@ -338,4 +338,4 @@ def publish():
 
         upload_collection_from_hashed_tempfile(target, tmp, property_fallback=property_fallback)
 
-    return jsonify(task=url_for(".import_singleton", _external=True, _scheme=_scheme)) # FIXME: external?
+    return jsonify(task=url_for(".import_singleton", _external=False, _scheme=_scheme))
