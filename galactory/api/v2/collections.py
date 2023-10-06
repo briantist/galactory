@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Brian Scholer (@briantist)
 
-import semver
+from semver import VersionInfo
 from base64io import Base64IO
 from flask import Response, jsonify, abort, url_for, request, current_app
 
@@ -9,8 +9,6 @@ from . import bp as v2
 from ... import constants as C
 from ...utilities import (
     discover_collections,
-    collected_collections,
-    _collection_listing,
     authorize,
     _chunk_to_temp,
     upload_collection_from_hashed_tempfile,
