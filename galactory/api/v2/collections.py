@@ -63,7 +63,16 @@ def collections():
         }
         results.append(result)
 
-    return jsonify(count=len(results), results=results, next=None, next_link=None, previous=None, previous_link=None)
+    out = {
+        'count': len(results),
+        'results': results,
+        'next': None,
+        'next_link': None,
+        'previous': None,
+        'previous_link': None,
+    }
+
+    return out
 
 
 @v2.route('/collections/<namespace>/<collection>')
