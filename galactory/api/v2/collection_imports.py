@@ -2,7 +2,6 @@
 # (c) 2022 Brian Scholer (@briantist)
 
 from datetime import datetime
-from flask import jsonify
 
 from . import bp
 
@@ -13,4 +12,4 @@ def import_singleton():
         'state': 'completed',
         'finished_at': datetime.utcnow(),
     }
-    return jsonify(out)
+    return out
