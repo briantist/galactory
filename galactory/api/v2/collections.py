@@ -234,7 +234,7 @@ def version(namespace, collection, version):
                 filename=upstream_result['artifact']['filename'],
                 _external=True,
                 _scheme=scheme,
-            ),
+            )
             return upstream_result
         else:
             abort(C.HTTP_NOT_FOUND)
