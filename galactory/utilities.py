@@ -95,7 +95,7 @@ def discover_collections(
             # to avoid excessive additional requests for properties and stat that slow
             # down the listing immensely as the number of collections grows.
             try:
-                f_namespace, f_name, f_version = p.name.replace('.tar.gz', '').split('-')
+                f_namespace, f_name, f_version = p.name.replace('.tar.gz', '').split('-', maxsplit=2)
             except ValueError:
                 pass
             else:
