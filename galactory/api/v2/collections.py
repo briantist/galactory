@@ -178,9 +178,9 @@ def versions(namespace, collection):
     if len(collections) > 1:
         abort(C.HTTP_INTERNAL_SERVER_ERROR)
 
-    collection = next(iter(collections.values()))
+    col = next(iter(collections.values()))
     vers = set()
-    for i in collection.values():
+    for i in col.values():
         results.append(
             {
                 'href': url_for(
