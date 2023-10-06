@@ -232,7 +232,7 @@ class ProxyUpstream:
         # FIXME: use the correct parameter for the galaxy API version
         params['page_size'] = params['limit'] = 100
 
-        req = requests.Request(method=request.method, url=rewritten, headers=headers, data=request.data, params=request.args)
+        req = requests.Request(method=request.method, url=rewritten, headers=headers, data=request.data, params=params)
 
         if prepared:
             prepared = req.prepare()
