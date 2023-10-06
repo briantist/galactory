@@ -134,6 +134,7 @@ def test_collectiondata_compare_versioninfo(
 
     ver = semver.VersionInfo.parse(other_version)
 
+    assert (col == ver) == (col.semver == ver)
     if col.is_prerelease == (ver.prerelease is not None):
         assert (col < ver) == (col.semver < ver)
     else:

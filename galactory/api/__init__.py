@@ -4,10 +4,12 @@
 from flask import Blueprint, jsonify
 
 from .v2 import bp as v2
+from .v3 import bp as v3
 
 API_RESPONSE = {
     'available_versions': {
         'v2': 'v2/',
+        # 'v3': 'v3/',
     },
     'current_version': 'v2',
     'description': 'GALAXY REST API',
@@ -15,6 +17,7 @@ API_RESPONSE = {
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 bp.register_blueprint(v2)
+bp.register_blueprint(v3)
 
 @bp.route('')
 @bp.route('/')
