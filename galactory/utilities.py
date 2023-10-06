@@ -22,6 +22,7 @@ from artifactory import ArtifactoryPath, ArtifactoryException
 from dohq_artifactory.auth import XJFrogArtApiAuth, XJFrogArtBearerAuth
 
 from . import constants as C
+from .models import CollectionData
 from .iter_tar import iter_tar
 
 
@@ -84,7 +85,13 @@ def load_manifest_from_archive(handle, seek_to_zero_after=True):
                 return data
 
 
-def discover_collections(repo, namespace=None, name=None, version=None, fast_detection=True, scheme=None):
+def discover_collections(
+    repo: ArtifactoryPath,
+    namespace: str = None,
+    name: str = None,
+    version: str = None,
+    fast_detection: bool = True,
+):
     for p in repo:
         if fast_detection:
             # we're going to use the naming convention to eliminate candidates early,
@@ -112,34 +119,13 @@ def discover_collections(repo, namespace=None, name=None, version=None, fast_det
         if not props.get('collection_info'):
             continue
 
-        collection_info = json.loads(props['collection_info'][0])
-
-        coldata = {
-            'collection_info': collection_info,
-            'fqcn': props['fqcn'][0],
-            'created': info.ctime.isoformat(),
-            'modified': info.mtime.isoformat(),
-            'namespace': {'name': props['namespace'][0]},
-            'name': props['name'][0],
-            'filename': p.name,
-            'sha256': info.sha256,
-            'size': info.size,
-            'download_url': url_for(
-                'download.download',
-                filename=p.name,
-                _external=True,
-                _scheme=scheme,
-            ),
-            'mime_type': info.mime_type,
-            'version': props['version'][0],
-            'semver': semver.VersionInfo.parse(props['version'][0]),
-        }
+        coldata = CollectionData.from_artifactory_path(path=p, properties=props, stat=info)
 
         if all(
             (
-                not namespace or coldata['namespace']['name'] == namespace,
-                not name or coldata['name'] == name,
-                not version or coldata['version'] == version
+                not namespace or coldata.namespace == namespace,
+                not name or coldata.name == name,
+                not version or coldata.version == version
             )
         ):
             yield coldata
