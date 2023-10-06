@@ -149,7 +149,13 @@ class ProxyUpstream:
 
     @contextmanager
     def proxy_download(self, request):
-        req = self._rewrite_to_upstream(request, self._upstream)
+        no_rewrite = C.QUERY_DOWNLOAD_UPSTREAM_URL in request.args
+        if no_rewrite:
+            upstream_url = request.args[C.QUERY_DOWNLOAD_UPSTREAM_URL]
+        else:
+            upstream_url = self._upstream
+
+        req = self._rewrite_to_upstream(request, upstream_url, no_rewrite=no_rewrite, no_paginate=True)
         with _session_with_retries() as s:
             try:
                 # Merge environment settings into session
@@ -218,19 +224,23 @@ class ProxyUpstream:
 
         return ret
 
-    def _rewrite_to_upstream(self, request, upstream_url, prepared=True):
+    def _rewrite_to_upstream(self, request, upstream_url, *, prepared=True, no_rewrite=False, no_paginate=False):
         this_url = request.base_url
         this_root = request.url_root
-        rewritten = this_url.replace(this_root, upstream_url)
-
-        current_app.logger.info(f"Rewriting '{this_url}' to '{rewritten}'")
+        if no_rewrite:
+            params = {}
+            rewritten = upstream_url
+            current_app.logger.info(f"Not rewriting '{this_url}'; using '{rewritten}'")
+        else:
+            rewritten = this_url.replace(this_root, upstream_url)
+            current_app.logger.info(f"Rewriting '{this_url}' to '{rewritten}'")
+            params = request.args.copy()
+            if not no_paginate:
+                # FIXME: use the correct parameter for the galaxy API version
+                params['page_size'] = params['limit'] = 100
 
         headers = {k: v for k, v in request.headers.items() if k not in ['Authorization', 'Host']}
         headers['Accept'] = 'application/json, */*'
-
-        params = request.args.copy()
-        # FIXME: use the correct parameter for the galaxy API version
-        params['page_size'] = params['limit'] = 100
 
         req = requests.Request(method=request.method, url=rewritten, headers=headers, data=request.data, params=params)
 

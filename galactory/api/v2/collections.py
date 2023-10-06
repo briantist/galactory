@@ -229,11 +229,12 @@ def version(namespace, collection, version):
         if upstream and (not no_proxy or namespace not in no_proxy):
             proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
             upstream_result = proxy.proxy(request)
-            url_for(
+            upstream_result['download_url'] = url_for(
                 'download.download',
                 filename=upstream_result['artifact']['filename'],
                 _external=True,
                 _scheme=scheme,
+                **{C.QUERY_DOWNLOAD_UPSTREAM_URL: upstream_result['download_url']},
             )
             return upstream_result
         else:
