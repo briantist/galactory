@@ -283,4 +283,4 @@ def publish():
 
         upload_collection_from_hashed_tempfile(target, tmp, property_fallback=property_fallback)
 
-    return jsonify(task=url_for('api.v2.import_singleton', _external=True, _scheme=_scheme))
+    return jsonify(task=url_for(f"{request.blueprint}.import_singleton", _external=True, _scheme=_scheme))
