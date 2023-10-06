@@ -29,7 +29,7 @@ def collections():
     for colgroup in colcol.values():
         result = {
             'href': url_for(
-                f"{request.blueprint}.collection",
+                ".collection",
                 namespace=colgroup.namespace,
                 collection=colgroup.name,
                 _external=True,
@@ -43,7 +43,7 @@ def collections():
             'created': colgroup.latest.created,
             'modified': colgroup.latest.modified,
             'versions_url': url_for(
-                f"{request.blueprint}.versions",
+                ".versions",
                 namespace=colgroup.latest.namespace,
                 collection=colgroup.latest.name,
                 _external=True,
@@ -51,7 +51,7 @@ def collections():
             ),
             'latest_version': {
                 'href': url_for(
-                    f"{request.blueprint}.version",
+                    ".version",
                     namespace=colgroup.latest.namespace,
                     collection=colgroup.latest.name,
                     version=colgroup.latest.version,
@@ -118,7 +118,7 @@ def collection(namespace, collection):
 
     result = {
         'href': url_for(
-            f"{request.blueprint}.collection",
+            ".collection",
             namespace=colgroup.namespace,
             collection=colgroup.name,
             _external=True,
@@ -132,7 +132,7 @@ def collection(namespace, collection):
         'created': colgroup.latest.created,
         'modified': colgroup.latest.modified,
         'versions_url': url_for(
-            f"{request.blueprint}.versions",
+            ".versions",
             namespace=colgroup.latest.namespace,
             collection=colgroup.latest.name,
             _external=True,
@@ -140,7 +140,7 @@ def collection(namespace, collection):
         ),
         'latest_version': {
             'href': url_for(
-                f"{request.blueprint}.version",
+                ".version",
                 namespace=colgroup.latest.namespace,
                 collection=colgroup.latest.name,
                 version=colgroup.latest.version,
@@ -184,7 +184,7 @@ def versions(namespace, collection):
         results.append(
             {
                 'href': url_for(
-                    f"{request.blueprint}.version",
+                    ".version",
                     namespace=i.namespace,
                     collection=i.name,
                     version=i.version,
@@ -248,7 +248,7 @@ def version(namespace, collection, version):
         },
         'collection': {
             'href': url_for(
-                f"{request.blueprint}.collection",
+                ".collection",
                 namespace=info.namespace,
                 collection=info.name,
                 _external=True,
@@ -267,7 +267,7 @@ def version(namespace, collection, version):
         ),
         'hidden': False,
         'href': url_for(
-            f"{request.blueprint}.collection",
+            ".collection",
             namespace=info.namespace,
             collection=info.name,
             _external=True,
@@ -297,4 +297,4 @@ def publish():
 
         upload_collection_from_hashed_tempfile(target, tmp, property_fallback=property_fallback)
 
-    return jsonify(task=url_for(f"{request.blueprint}.import_singleton", _external=True, _scheme=_scheme))
+    return jsonify(task=url_for(".import_singleton", _external=True, _scheme=_scheme))
