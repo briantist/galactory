@@ -147,7 +147,7 @@ def collection(namespace, collection):
 
 
 @v2.route('/collections/<namespace>/<collection>/versions')
-@v2.route('/collections/<namespace>/<collection>/versions/')
+@v2.route('/collections/<namespace>/<collection>/versions/', endpoint='versions')
 def versions(namespace, collection):
     results = []
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
@@ -163,7 +163,7 @@ def versions(namespace, collection):
         proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
         upstream_result = proxy.proxy(request)
 
-    collections = collected_collections(repository, namespace=namespace, name=collection, scheme=scheme)
+    collections = CollectionCollection.from_collections(discover_collections(repo=repository, namespace=namespace, name=collection, scheme=scheme))
 
     if not (collections or upstream_result):
         abort(C.HTTP_NOT_FOUND)
@@ -171,23 +171,23 @@ def versions(namespace, collection):
     if len(collections) > 1:
         abort(C.HTTP_INTERNAL_SERVER_ERROR)
 
+    collection = next(iter(collections.values()))
     vers = set()
-    for _, c in collections.items():
-        for v, i in c['versions'].items():
-            results.append(
-                {
-                    'href': url_for(
-                        'api.v2.version',
-                        namespace=i['namespace']['name'],
-                        collection=i['name'],
-                        version=v,
-                        _external=True,
-                        _scheme=scheme,
-                    ),
-                    'version': v,
-                }
-            )
-            vers.add(v)
+    for i in collection.values():
+        results.append(
+            {
+                'href': url_for(
+                    f"{request.blueprint}.version",
+                    namespace=i.namespace,
+                    collection=i.name,
+                    version=i.version,
+                    _external=True,
+                    _scheme=scheme,
+                ),
+                'version': i.version,
+            }
+        )
+        vers.add(i.version)
 
     if upstream_result:
         for item in upstream_result['results']:
@@ -197,10 +197,12 @@ def versions(namespace, collection):
     out = {
         'count': len(results),
         'next': None,
+        'next_link': None,
         'previous': None,
+        'previous_link': None,
         'results': results,
     }
-    return jsonify(out)
+    return out
 
 
 @v2.route('/collections/<namespace>/<collection>/versions/<version>')
