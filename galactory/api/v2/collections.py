@@ -69,7 +69,7 @@ def collections():
 
 
 @v2.route('/collections/<namespace>/<collection>')
-@v2.route('/collections/<namespace>/<collection>/')
+@v2.route('/collections/<namespace>/<collection>/', endpoint='collection')
 def collection(namespace, collection):
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
     upstream = current_app.config['PROXY_UPSTREAM']
@@ -84,24 +84,66 @@ def collection(namespace, collection):
         proxy = ProxyUpstream(repository, upstream, cache_read, cache_write, cache_minutes)
         upstream_result = proxy.proxy(request)
 
-    results = _collection_listing(repository, namespace, collection, scheme=scheme)
+    colcol = CollectionCollection.from_collections(discover_collections(repo=repository, namespace=namespace, name=collection, scheme=scheme))
 
-    if not (results or upstream_result):
+
+    if not (colcol or upstream_result):
         abort(C.HTTP_NOT_FOUND)
 
-    result = None
-    if results:
-        if len(results) > 1:
+    colgroup = None
+    if colcol:
+        if len(colcol) > 1:
             abort(C.HTTP_INTERNAL_SERVER_ERROR)
-        result = results[0]
+        colgroup = next(iter(colcol.values()))
 
     if upstream_result:
-        if result is None:
+        if colgroup is None:
             result = upstream_result
         else:
-            result = max((result, upstream_result), key=lambda r: semver.VersionInfo.parse(r['latest_version']['version']))
+            try:
+                upstream_version = VersionInfo.parse(upstream_result['latest_version']['version'])
+            except (KeyError, ValueError):
+                # TODO: warn?
+                pass
+            else:
+                if colgroup.latest < upstream_version:
+                    return upstream_result
 
-    return jsonify(result)
+    result = {
+        'href': url_for(
+            f"{request.blueprint}.collection",
+            namespace=colgroup.namespace,
+            collection=colgroup.name,
+            _external=True,
+            _scheme=scheme
+        ),
+        'name': colgroup.latest.name,
+        'namespace': {
+            'name': colgroup.latest.namespace,
+        },
+        'deprecated': False, # FIXME
+        'created': colgroup.latest.created,
+        'modified': colgroup.latest.modified,
+        'versions_url': url_for(
+            f"{request.blueprint}.versions",
+            namespace=colgroup.latest.namespace,
+            collection=colgroup.latest.name,
+            _external=True,
+            _scheme=scheme,
+        ),
+        'latest_version': {
+            'href': url_for(
+                f"{request.blueprint}.version",
+                namespace=colgroup.latest.namespace,
+                collection=colgroup.latest.name,
+                version=colgroup.latest.version,
+                _external=True,
+                _scheme=scheme,
+            ),
+            "version": colgroup.latest.version,
+        },
+    }
+    return result
 
 
 @v2.route('/collections/<namespace>/<collection>/versions')
