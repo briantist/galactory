@@ -200,6 +200,7 @@ class ProxyUpstream:
         return self._rewrite_upstream_response(cache.data, url_for('root.index', _external=True, _scheme=scheme))
 
     def _rewrite_upstream_response(self, response_data, url_root) -> dict:
+        _SKIP_FIELDS = frozenset(['id', 'download_count'])
         ret = {}
         for k, v in response_data.items():
             if isinstance(v, dict):
@@ -210,7 +211,7 @@ class ProxyUpstream:
                 if 'api/v1' in v:
                     continue
                 ret[k] = v.replace(self._upstream, url_root)
-            elif k == 'id':
+            elif k in _SKIP_FIELDS:
                 continue
             else:
                 ret[k] = v
