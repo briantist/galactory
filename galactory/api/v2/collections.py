@@ -33,7 +33,7 @@ def collections():
                 namespace=colgroup.namespace,
                 collection=colgroup.name,
                 _external=True,
-                _scheme=scheme
+                _scheme=scheme,
             ),
             'name': colgroup.name,
             'namespace': {
@@ -122,7 +122,7 @@ def collection(namespace, collection):
             namespace=colgroup.namespace,
             collection=colgroup.name,
             _external=True,
-            _scheme=scheme
+            _scheme=scheme,
         ),
         'name': colgroup.latest.name,
         'namespace': {
@@ -270,7 +270,7 @@ def version(namespace, collection, version):
             namespace=info.namespace,
             collection=info.name,
             _external=True,
-            _scheme=scheme
+            _scheme=scheme,
         ),
         'id': 0,
         'metadata': info.collection_info,
