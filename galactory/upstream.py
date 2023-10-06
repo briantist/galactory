@@ -219,7 +219,7 @@ class ProxyUpstream:
         return ret
 
     def _rewrite_to_upstream(self, request, upstream_url, prepared=True):
-        this_url = request.url
+        this_url = request.base_url
         this_root = request.url_root
         rewritten = this_url.replace(this_root, upstream_url)
 
@@ -228,7 +228,11 @@ class ProxyUpstream:
         headers = {k: v for k, v in request.headers.items() if k not in ['Authorization', 'Host']}
         headers['Accept'] = 'application/json, */*'
 
-        req = requests.Request(method=request.method, url=rewritten, headers=headers, data=request.data)
+        params = request.args.copy()
+        # FIXME: use the correct parameter for the galaxy API version
+        params['page_size'] = params['limit'] = 100
+
+        req = requests.Request(method=request.method, url=rewritten, headers=headers, data=request.data, params=request.args)
 
         if prepared:
             prepared = req.prepare()
