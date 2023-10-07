@@ -169,7 +169,7 @@ def _chunk_to_temp(fsrc, iterator=None, spool_size=5*1024*1024, seek_to_zero=Tru
     if seek_to_zero:
         tmp.seek(0)
 
-    return HashedTempFile(tmp, md5sum.hexdigest(), sha1sum.hexdigest(),  sha256sum.hexdigest(), close=close)
+    return HashedTempFile(tmp, md5sum.hexdigest(), sha1sum.hexdigest(), sha256sum.hexdigest(), close=close)
 
 
 def upload_collection_from_hashed_tempfile(artifact: ArtifactoryPath, tmpfile: HashedTempFile, property_fallback: bool = False) -> t.Dict[str, t.Any]:
