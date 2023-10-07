@@ -206,9 +206,33 @@ class ProxyUpstream:
         return self._rewrite_upstream_response(cache.data, url_for('root.index', _external=True, _scheme=scheme))
 
     def _rewrite_upstream_response(self, response_data, url_root) -> dict:
-        _SKIP_FIELDS = frozenset(['id', 'download_count'])
+        # Remove these keys from the response.
+        # If the value is not None, only remove when the type matches.
+        _REMOVE_FIELDS = {
+            # TODO: should id refer to some Artifactory ID?
+            'id': (int, str),
+            # TODO: use artifactory download count, or combine with upstream?
+            'download_count': int,
+        }
+
+        # Leave these fields in the response without alteration or
+        # further processing. Same rules as _REMOVE_FIELDS.
+        _SKIP_FIELDS = {
+            # This field is an absolute URL, and will not necessarily map to
+            # a known API path, even if it does in public Galaxy.
+            # We will leave it unadultered and let the API paths that expect
+            # this field to overwrite it or not.
+            'download_url': None,
+        }
+
         ret = {}
         for k, v in response_data.items():
+            if k in _SKIP_FIELDS and (_SKIP_FIELDS[k] is None or isinstance(v, _SKIP_FIELDS[k])):
+                ret[k] = v
+                continue
+            if k in _REMOVE_FIELDS and (_REMOVE_FIELDS[k] is None or isinstance(v, _REMOVE_FIELDS[k])):
+                continue
+
             if isinstance(v, dict):
                 ret[k] = self._rewrite_upstream_response(v, url_root)
             elif isinstance(v, list):
@@ -217,8 +241,6 @@ class ProxyUpstream:
                 if 'api/v1' in v:
                     continue
                 ret[k] = v.replace(self._upstream, url_root)
-            elif k in _SKIP_FIELDS:
-                continue
             else:
                 ret[k] = v
 
