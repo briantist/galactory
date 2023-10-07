@@ -12,3 +12,7 @@ bugfixes:
 trivial:
   - Fast detection did not support detecting prerelease collections (https://github.com/briantist/galactory/issues/100).
   - A lot of internal methods have been refactored into custom classes to represent the data, in order to help separate the models from the API version and response formats (https://github.com/briantist/galactory/pull/104).
+
+known_issues:
+  - Galactory does not support proper paginated responses or proxying. This has always been the case and is not new to this release, but this bug is now tracked (https://github.com/briantist/galactory/issues/99).
+  - Upstream proxying does not support translation of requests between API versions. While galsctory can serve both v2 and v3 simultaneously, an individual request will be proxied to the upstream as is, so the configured upstream must support the version of the request (https://github.com/briantist/galactory/pull/104).
