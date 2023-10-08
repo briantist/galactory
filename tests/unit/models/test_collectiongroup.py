@@ -5,26 +5,9 @@ import pytest
 
 import re
 from semver import VersionInfo
-from datetime import datetime, timezone
 from pytest_mock import MockFixture
 
 from galactory.models import CollectionData, CollectionGroup
-
-
-@pytest.fixture
-def collection_data() -> CollectionData:
-    return CollectionData(
-        collection_info={},
-        namespace='ns',
-        name='name',
-        created_datetime=datetime.now(timezone.utc),
-        modified_datetime=datetime.now(timezone.utc),
-        filename='fake-file',
-        mime_type='fake-file',
-        sha256='m-m-m-my-sha-',
-        size=0,
-        version='0.0.0',
-    )
 
 
 @pytest.mark.parametrize('name', ['collection_name', 'name2'])
