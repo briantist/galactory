@@ -15,8 +15,9 @@ from galactory.utilities import discover_collections as original_discover_collec
 
 
 @pytest.fixture
-def app():
-    return create_app()
+def app(request: pytest.FixtureRequest):
+    config = getattr(request, 'param', None) or {}
+    return create_app(**config)
 
 
 @pytest.fixture
