@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # (c) 2023 Brian Scholer (@briantist)
 
+import sys
 import pytest
 
 import semver
@@ -143,6 +144,7 @@ def test_collectiondata_compare_versioninfo(
     else:
         assert (col < ver) == (col.is_prerelease)
 
+@pytest.mark.xfail(condition=(sys.version_info >= (3, 10)), reason="Python>=3.10 tests don't work: https://github.com/briantist/galactory/issues/90")
 def test_from_artifactory_repository(mocker: MockFixture, repository: ArtifactoryPath):
     spy = mocker.spy(CollectionData, '__init__')
 

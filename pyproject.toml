@@ -63,6 +63,7 @@ exclude = ["changelogs"]
 [tool.pytest.ini_options]
 minversion = "7.1"
 addopts = "--cov --cov-report=xml"
+xfail_strict = true
 # addopts = "--docker-compose=artifactory/docker-compose.yml"
 # addopts = "-ra -q"
 testpaths = [
