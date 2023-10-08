@@ -1,0 +1,7 @@
+---
+release_summary: |-
+  Galactory finally supports the Galaxy v3 API. If you're using the upstream proxy functionality with galaxy.ansible.com then this will be required since they made the switch to galaxy_ng which no longer supports API v2.
+
+  This release contains a lot of changes, but because support for v3 is so important due to the recent galaxy change, I've tried hard to introduce no breaking changes. Deprecations scheduled for this release have been postponed to the next one.
+
+  This release should be a drop-in replacement if you're up-to-date on the previous release, without requiring any configuration changes. The v3 support and other new features and bugfixes are active in the default configuration and should have no breakages, but options are included to turn off some of those features.
