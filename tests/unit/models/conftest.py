@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# (c) 2022 Brian Scholer (@briantist)
+# (c) 2023 Brian Scholer (@briantist)
 
 import pytest
 import typing as t
