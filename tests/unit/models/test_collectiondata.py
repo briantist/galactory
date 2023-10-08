@@ -144,6 +144,56 @@ def test_collectiondata_compare_versioninfo(
     else:
         assert (col < ver) == (col.is_prerelease)
 
+
+def test_collectiondata_compare_othertypes(mocker: MockFixture):
+    spy_eq = mocker.spy(CollectionData, '__eq__')
+    spy_lt = mocker.spy(CollectionData, '__lt__')
+
+    coldata = CollectionData(
+        collection_info={},
+        created_datetime=datetime.now(timezone.utc),
+        modified_datetime=datetime.now(timezone.utc),
+        filename='fname',
+        mime_type='mime',
+        size=0,
+        namespace='ns',
+        name='col',
+        version='1.2.3',
+        sha256='a',
+    )
+
+    standin = 5
+
+    assert coldata != mocker.sentinel.whatever
+    spy_eq.assert_called_once_with(coldata, mocker.sentinel.whatever)
+    assert spy_eq.spy_return is NotImplemented
+    spy_eq.reset_mock()
+
+    assert coldata != standin
+    spy_eq.assert_called_once_with(coldata, standin)
+    assert spy_eq.spy_return is NotImplemented
+    spy_eq.reset_mock()
+
+    assert standin != coldata
+    spy_eq.assert_called_once_with(coldata, standin)
+    assert spy_eq.spy_return is NotImplemented
+    spy_eq.reset_mock()
+
+    rmsg = r"not supported between instances of 'CollectionData' and"
+
+    with pytest.raises(TypeError, match=rmsg):
+        assert not (coldata < standin)
+    spy_lt.assert_called_once_with(coldata, standin)
+    assert spy_lt.spy_return is NotImplemented
+    spy_lt.reset_mock()
+
+    with pytest.raises(TypeError, match=rmsg):
+        assert not (coldata > standin)
+    spy_lt.assert_called_once_with(coldata, standin)
+    assert spy_lt.spy_return is NotImplemented
+    spy_lt.reset_mock()
+
+
 @pytest.mark.xfail(condition=(sys.version_info >= (3, 10)), reason="Python>=3.10 tests don't work: https://github.com/briantist/galactory/issues/90")
 def test_from_artifactory_repository(mocker: MockFixture, repository: ArtifactoryPath):
     spy = mocker.spy(CollectionData, '__init__')
