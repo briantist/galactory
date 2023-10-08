@@ -84,7 +84,16 @@ def test_collectiongroup_add(mocker: MockFixture, namespace, name, collection_da
 
 
     colgroup.add(collection_data)
+    spy.assert_called_once_with(colgroup, collection_data.semver, collection_data)
     assert len(colgroup) == 1
     assert colgroup.latest is collection_data
 
-    spy.assert_called_once_with(colgroup, collection_data.semver, collection_data)
+
+def test_collectiongroup_from_collection(mocker: MockFixture, collection_data: CollectionData):
+    spy = mocker.spy(CollectionGroup, '__init__')
+
+    colgroup = CollectionGroup.from_collection(collection_data)
+
+    spy.assert_called_once_with(mocker.ANY, namespace=collection_data.namespace, name=collection_data.name)
+    assert len(colgroup) == 1
+    assert colgroup.latest is collection_data

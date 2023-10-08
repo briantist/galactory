@@ -162,7 +162,7 @@ class CollectionGroup(UserDict):
     def __delitem__(self, key: t.Union[str, VersionInfo]) -> None:
         return super().__delitem__(self._get_key(key))
 
-    def __contains__(self, key: object) -> bool:
+    def __contains__(self, key: t.Union[str, VersionInfo]) -> bool:
         return super().__contains__(self._get_key(key, raises=False))
 
     # re-define for the type hints
