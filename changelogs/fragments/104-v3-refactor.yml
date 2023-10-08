@@ -1,0 +1,19 @@
+---
+major_changes:
+  - Galactory now supports v3 of the Galaxy API, both as a server, and as a client for upstream proxying (https://github.com/briantist/galactory/issues/23, https://github.com/briantist/galactory/pull/104).
+
+minor_changes:
+  - Requests that are proxied to an upstream now override the query string to always request 100 results. This is a slight, partial mitigation for our current lack of true pagination suppport (https://github.com/briantist/galactory/issues/99, https://github.com/briantist/galactory/pull/104).
+  - The ``download`` endpoint now supports a query string parameter ``galactory_upstream_url``. When this parameter is set, and the requested artifact does not already exist in artifactory, this exact URL will be used as the upstream location for this file. If the parameter is not set, it uses the previous proxying behavior for downloads, which is to append the route to the configured upstream to determine its URL. API responses from galactory that contain a ``download_url`` field will automatically generate proper URLs with this parameter set, and it does not require additional configuration or user concern (https://github.com/briantist/galactory/pull/104).
+  - Added the ``API_VERSION`` multi-valued config option to control which version(s) of the galaxy API are supported for the running instance (https://github.com/briantist/galactory/pull/104).
+
+bugfixes:
+  - The ``href`` field of several API responses was incorrect, pointing back at the URL requested instead of pointing at the collection endpoint (https://github.com/briantist/galactory/issues/103).
+
+trivial:
+  - Fast detection did not support detecting prerelease collections (https://github.com/briantist/galactory/issues/100).
+  - A lot of internal methods have been refactored into custom classes to represent the data, in order to help separate the models from the API version and response formats (https://github.com/briantist/galactory/pull/104).
+
+known_issues:
+  - Galactory does not support proper paginated responses or proxying. This has always been the case and is not new to this release, but this bug is now tracked (https://github.com/briantist/galactory/issues/99).
+  - Upstream proxying does not support translation of requests between API versions. While galactory can serve both v2 and v3 simultaneously, an individual request will be proxied to the upstream as is, so the configured upstream must support the version of the request (https://github.com/briantist/galactory/pull/104).

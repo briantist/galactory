@@ -9,6 +9,7 @@ from types import GeneratorType
 import semver
 
 from galactory.utilities import discover_collections
+from galactory.models import CollectionData
 
 
 def test_discover_collections_skip_dirs(repository):
@@ -25,8 +26,8 @@ def test_discover_collections_skip_missing_version(repository, props):
 
 
 @pytest.mark.parametrize('namespace', [None, 'community', 'briantist', 'fake'])
-@pytest.mark.parametrize('collection', [None, 'whatever', 'hashi_vault', 'devel', 'fake'])
-@pytest.mark.parametrize('version', [None, '2.5.0', '3.0.0', '0.1.0', '0.2.0', '0.0.0', '0.1.0-dev0', '0.1.0-dev1', '0.2.0-dev0'])
+@pytest.mark.parametrize('collection', [None, 'whatever', 'hashi_vault', 'fake', 'devel'])
+@pytest.mark.parametrize('version', [None, '2.5.0', '3.0.0', '0.1.0', '0.2.0', '0.0.0'])
 def test_discover_collections_any(repository, manifest_loader, namespace, collection, version, app_request_context):
     gen = discover_collections(repository, namespace, collection, version)
 
@@ -49,36 +50,15 @@ def test_discover_collections_any(repository, manifest_loader, namespace, collec
     # manifest_loader.assert_has_calls(expected_calls, any_order=True)
 
     for c in collections:
-        assert 'collection_info' in c
-        assert datetime.fromisoformat(c['created']).utcoffset() == timedelta(0)
-        assert datetime.fromisoformat(c['modified']).utcoffset() == timedelta(0)
-        assert isinstance(c['namespace'], dict) and 'name' in c['namespace']
-        assert 'name' in c
-        assert c['fqcn'] == f"{c['namespace']['name']}.{c['name']}"
-        assert 'filename' in c
-        assert 'sha256' in c
-        assert 'size' in c
-        assert 'download_url' in c
-        assert 'mime_type' in c
-        assert 'version' in c
-        assert isinstance(c['semver'], semver.VersionInfo) and semver.VersionInfo.parse(c['version']) == c['semver']
+        assert isinstance(c, CollectionData)
+        assert c.created_datetime.utcoffset() == timedelta(0)
+        assert c.modified_datetime.utcoffset() == timedelta(0)
+        assert datetime.fromisoformat(c.created) == c.created_datetime
+        assert datetime.fromisoformat(c.modified) == c.modified_datetime
+        assert c.fqcn == f"{c.namespace}.{c.name}"
+        assert isinstance(c.semver, semver.VersionInfo)
+        assert semver.VersionInfo.parse(c.version) == c.semver
 
-        assert namespace is None or c['namespace']['name'] == namespace
-        assert collection is None or c['name'] == collection
-        assert version is None or c['semver'] == semver.VersionInfo.parse(version)
-
-        # coldata = {
-        #     'collection_info': manifest['collection_info'],
-        #     'fqcn': props['fqcn'][0],
-        #     'created': info.ctime.isoformat(),
-        #     'modified': info.mtime.isoformat(),
-        #     'namespace': {'name': props['namespace'][0]},
-        #     'name': props['name'][0],
-        #     'filename': p.name,
-        #     'sha256': info.sha256,
-        #     'size': info.size,
-        #     'download_url': str(p),
-        #     'mime_type': info.mime_type,
-        #     'version': props['version'][0],
-        #     'semver': semver.VersionInfo.parse(props['version'][0]),
-        # }
+        assert namespace is None or c.namespace == namespace
+        assert collection is None or c.name == collection
+        assert version is None or c.version == version

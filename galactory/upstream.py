@@ -149,7 +149,13 @@ class ProxyUpstream:
 
     @contextmanager
     def proxy_download(self, request):
-        req = self._rewrite_to_upstream(request, self._upstream)
+        no_rewrite = C.QUERY_DOWNLOAD_UPSTREAM_URL in request.args
+        if no_rewrite:
+            upstream_url = request.args[C.QUERY_DOWNLOAD_UPSTREAM_URL]
+        else:
+            upstream_url = self._upstream
+
+        req = self._rewrite_to_upstream(request, upstream_url, no_rewrite=no_rewrite, no_paginate=True)
         with _session_with_retries() as s:
             try:
                 # Merge environment settings into session
@@ -200,8 +206,33 @@ class ProxyUpstream:
         return self._rewrite_upstream_response(cache.data, url_for('root.index', _external=True, _scheme=scheme))
 
     def _rewrite_upstream_response(self, response_data, url_root) -> dict:
+        # Remove these keys from the response.
+        # If the value is not None, only remove when the type matches.
+        _REMOVE_FIELDS = {
+            # TODO: should id refer to some Artifactory ID?
+            'id': (int, str),
+            # TODO: use artifactory download count, or combine with upstream?
+            'download_count': int,
+        }
+
+        # Leave these fields in the response without alteration or
+        # further processing. Same rules as _REMOVE_FIELDS.
+        _SKIP_FIELDS = {
+            # This field is an absolute URL, and will not necessarily map to
+            # a known API path, even if it does in public Galaxy.
+            # We will leave it unadultered and let the API paths that expect
+            # this field to overwrite it or not.
+            'download_url': None,
+        }
+
         ret = {}
         for k, v in response_data.items():
+            if k in _SKIP_FIELDS and (_SKIP_FIELDS[k] is None or isinstance(v, _SKIP_FIELDS[k])):
+                ret[k] = v
+                continue
+            if k in _REMOVE_FIELDS and (_REMOVE_FIELDS[k] is None or isinstance(v, _REMOVE_FIELDS[k])):
+                continue
+
             if isinstance(v, dict):
                 ret[k] = self._rewrite_upstream_response(v, url_root)
             elif isinstance(v, list):
@@ -210,24 +241,30 @@ class ProxyUpstream:
                 if 'api/v1' in v:
                     continue
                 ret[k] = v.replace(self._upstream, url_root)
-            elif k == 'id':
-                continue
             else:
                 ret[k] = v
 
         return ret
 
-    def _rewrite_to_upstream(self, request, upstream_url, prepared=True):
-        this_url = request.url
+    def _rewrite_to_upstream(self, request, upstream_url, *, prepared=True, no_rewrite=False, no_paginate=False):
+        this_url = request.base_url
         this_root = request.url_root
-        rewritten = this_url.replace(this_root, upstream_url)
-
-        current_app.logger.info(f"Rewriting '{this_url}' to '{rewritten}'")
+        if no_rewrite:
+            params = {}
+            rewritten = upstream_url
+            current_app.logger.info(f"Not rewriting '{this_url}'; using '{rewritten}'")
+        else:
+            rewritten = this_url.replace(this_root, upstream_url)
+            current_app.logger.info(f"Rewriting '{this_url}' to '{rewritten}'")
+            params = request.args.copy()
+            if not no_paginate:
+                # FIXME: use the correct parameter for the galaxy API version
+                params['page_size'] = params['limit'] = 100
 
         headers = {k: v for k, v in request.headers.items() if k not in ['Authorization', 'Host']}
         headers['Accept'] = 'application/json, */*'
 
-        req = requests.Request(method=request.method, url=rewritten, headers=headers, data=request.data)
+        req = requests.Request(method=request.method, url=rewritten, headers=headers, data=request.data, params=params)
 
         if prepared:
             prepared = req.prepare()

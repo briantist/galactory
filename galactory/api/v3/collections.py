@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# (c) 2022 Brian Scholer (@briantist)
+# (c) 2023 Brian Scholer (@briantist)
 
 from semver import VersionInfo
 from base64io import Base64IO
 from flask import Response, jsonify, abort, url_for, request, current_app
 
-from . import bp as v2
+from . import bp as v3
 from ... import constants as C
 from ...utilities import (
     discover_collections,
@@ -17,8 +17,10 @@ from ...upstream import ProxyUpstream
 from ...models import CollectionCollection
 
 
-@v2.route('/collections')
-@v2.route('/collections/', endpoint='collections')
+@v3.route('/collections')
+@v3.route('/collections/')
+@v3.route('/plugin/ansible/content/published/collections/index')
+@v3.route('/plugin/ansible/content/published/collections/index/', endpoint='collections')
 def collections():
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
     scheme = current_app.config.get('PREFERRED_URL_SCHEME')
@@ -32,30 +34,28 @@ def collections():
                 ".collection",
                 namespace=colgroup.namespace,
                 collection=colgroup.name,
-                _external=True,
-                _scheme=scheme,
+                _external=False,
+                _scheme=scheme
             ),
             'name': colgroup.name,
-            'namespace': {
-                'name': colgroup.namespace,
-            },
+            'namespace': colgroup.namespace,
             'deprecated': False, # FIXME
-            'created': colgroup.latest.created,
-            'modified': colgroup.latest.modified,
+            'created_at': colgroup.latest.created,
+            'updated_at': colgroup.latest.modified,
             'versions_url': url_for(
                 ".versions",
                 namespace=colgroup.latest.namespace,
                 collection=colgroup.latest.name,
-                _external=True,
+                _external=False,
                 _scheme=scheme,
             ),
-            'latest_version': {
+            'highest_version': {
                 'href': url_for(
                     ".version",
                     namespace=colgroup.latest.namespace,
                     collection=colgroup.latest.name,
                     version=colgroup.latest.version,
-                    _external=True,
+                    _external=False,
                     _scheme=scheme,
                 ),
                 "version": colgroup.latest.version,
@@ -63,20 +63,33 @@ def collections():
         }
         results.append(result)
 
+    this_url = url_for(
+        ".collections",
+        _external=False,
+        _scheme=scheme,
+        **request.args
+    )
+
     out = {
-        'count': len(results),
-        'results': results,
-        'next': None,
-        'next_link': None,
-        'previous': None,
-        'previous_link': None,
+        'meta': {
+            'count': len(results),
+        },
+        'links': { # FIXME
+            'first': this_url,
+            'previous': None,
+            'next': None,
+            'last': this_url,
+        },
+        'data': results,
     }
 
     return out
 
 
-@v2.route('/collections/<namespace>/<collection>')
-@v2.route('/collections/<namespace>/<collection>/', endpoint='collection')
+@v3.route('/collections/<namespace>/<collection>')
+@v3.route('/collections/<namespace>/<collection>/')
+@v3.route('/plugin/ansible/content/published/collections/index/<namespace>/<collection>')
+@v3.route('/plugin/ansible/content/published/collections/index/<namespace>/<collection>/', endpoint='collection')
 def collection(namespace, collection):
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
     upstream = current_app.config['PROXY_UPSTREAM']
@@ -108,7 +121,7 @@ def collection(namespace, collection):
             result = upstream_result
         else:
             try:
-                upstream_version = VersionInfo.parse(upstream_result['latest_version']['version'])
+                upstream_version = VersionInfo.parse(upstream_result['highest_version']['version'])
             except (KeyError, ValueError):
                 # TODO: warn?
                 pass
@@ -121,30 +134,28 @@ def collection(namespace, collection):
             ".collection",
             namespace=colgroup.namespace,
             collection=colgroup.name,
-            _external=True,
-            _scheme=scheme,
+            _external=False,
+            _scheme=scheme
         ),
         'name': colgroup.latest.name,
-        'namespace': {
-            'name': colgroup.latest.namespace,
-        },
+        'namespace': colgroup.latest.namespace,
         'deprecated': False, # FIXME
-        'created': colgroup.latest.created,
-        'modified': colgroup.latest.modified,
+        'created_at': colgroup.latest.created,
+        'updated_at': colgroup.latest.modified,
         'versions_url': url_for(
             ".versions",
             namespace=colgroup.latest.namespace,
             collection=colgroup.latest.name,
-            _external=True,
+            _external=False,
             _scheme=scheme,
         ),
-        'latest_version': {
+        'highest_version': {
             'href': url_for(
                 ".version",
                 namespace=colgroup.latest.namespace,
                 collection=colgroup.latest.name,
                 version=colgroup.latest.version,
-                _external=True,
+                _external=False,
                 _scheme=scheme,
             ),
             "version": colgroup.latest.version,
@@ -152,9 +163,10 @@ def collection(namespace, collection):
     }
     return result
 
-
-@v2.route('/collections/<namespace>/<collection>/versions')
-@v2.route('/collections/<namespace>/<collection>/versions/', endpoint='versions')
+@v3.route('/collections/<namespace>/<collection>/versions')
+@v3.route('/collections/<namespace>/<collection>/versions/')
+@v3.route('/plugin/ansible/content/published/collections/index/<namespace>/<collection>/versions')
+@v3.route('/plugin/ansible/content/published/collections/index/<namespace>/<collection>/versions/', endpoint='versions')
 def versions(namespace, collection):
     results = []
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
@@ -188,32 +200,52 @@ def versions(namespace, collection):
                     namespace=i.namespace,
                     collection=i.name,
                     version=i.version,
-                    _external=True,
+                    _external=False,
                     _scheme=scheme,
                 ),
                 'version': i.version,
+                'created_at': i.created,
+                'updated_at': i.modified,
+                'marks': [],
+                'requires_ansible': None, # FIXME
             }
         )
         vers.add(i.version)
 
     if upstream_result:
-        for item in upstream_result['results']:
+        for item in upstream_result['data']:
             if item['version'] not in vers:
                 results.append(item)
 
+    this_url = url_for(
+        ".versions",
+        namespace=namespace,
+        collection=collection,
+        _external=False,
+        _scheme=scheme,
+        **request.args
+    )
+
     out = {
-        'count': len(results),
-        'next': None,
-        'next_link': None,
-        'previous': None,
-        'previous_link': None,
-        'results': results,
+        'meta': {
+            'count': len(results),
+        },
+        'links': { # FIXME
+            'first': this_url,
+            'previous': None,
+            'next': None,
+            'last': this_url,
+        },
+        'data': results,
     }
+
     return out
 
 
-@v2.route('/collections/<namespace>/<collection>/versions/<version>')
-@v2.route('/collections/<namespace>/<collection>/versions/<version>/', endpoint='version')
+@v3.route('/collections/<namespace>/<collection>/versions/<version>')
+@v3.route('/collections/<namespace>/<collection>/versions/<version>/')
+@v3.route('/plugin/ansible/content/published/collections/index/<namespace>/<collection>/versions/<version>')
+@v3.route('/plugin/ansible/content/published/collections/index/<namespace>/<collection>/versions/<version>/', endpoint='version')
 def version(namespace, collection, version):
     repository = authorize(request, current_app.config['ARTIFACTORY_PATH'])
     upstream = current_app.config['PROXY_UPSTREAM']
@@ -251,7 +283,7 @@ def version(namespace, collection, version):
                 ".collection",
                 namespace=info.namespace,
                 collection=info.name,
-                _external=True,
+                _external=False,
                 _scheme=scheme,
             ),
             'name': info.name,
@@ -265,23 +297,32 @@ def version(namespace, collection, version):
             _external=True,
             _scheme=scheme,
         ),
+        'name': info.name,
+        'signatures': [],
         'hidden': False,
         'href': url_for(
             ".collection",
             namespace=info.namespace,
             collection=info.name,
-            _external=True,
-            _scheme=scheme,
+            _external=False,
+            _scheme=scheme
         ),
         'id': 0,
         'metadata': info.collection_info,
         'version': info.version,
+        'created_at': info.created,
+        'updated_at': info.modified,
+        'requires_ansible': None, # FIXME
+        'marks': [],
     }
     return out
 
 
-@v2.route('/collections', methods=['POST'])
-@v2.route('/collections/', methods=['POST'])
+# not going to preserve the v2 paths for uploading
+# @v3.route('/collections', methods=['POST'])
+# @v3.route('/collections/', methods=['POST'])
+@v3.route('/artifacts/collections', methods=['POST'])
+@v3.route('/artifacts/collections/', methods=['POST'], endpoint='publish')
 def publish():
     sha256 = request.form['sha256']
     file = request.files['file']
@@ -297,4 +338,4 @@ def publish():
 
         upload_collection_from_hashed_tempfile(target, tmp, property_fallback=property_fallback)
 
-    return jsonify(task=url_for(".import_singleton", _external=True, _scheme=_scheme))
+    return jsonify(task=url_for(".import_singleton", _external=False, _scheme=_scheme))

@@ -3,7 +3,7 @@
 # galactory
 galactory is An Ansible Galaxy proxy for Artifactory.
 
-Using an Artifactory Generic repository as its backend, galactory implements a limited subset of the Galaxy v2 API to allow for installing and publishing collections.
+Using an Artifactory Generic repository as its backend, galactory implements a limited subset of the Galaxy API (v2 & v3) to allow for installing and publishing collections.
 
 It can also be set up to transparently proxy an upstream Galaxy server, storing the pulled artifacts in Artifactory, to be served as local artifacts from then on. This helps avoid throttling errors on busy CI systems, and allows for internal/private collections to declare dependencies on upstream collections (dependencies will only be installed from the same Galaxy server where a collection was installed from).
 
@@ -45,6 +45,7 @@ usage: python -m galactory [-h] [-c CONFIG] [--listen-addr LISTEN_ADDR]
                            [--cache-read CACHE_READ] [--cache-write CACHE_WRITE]
                            [--use-property-fallback]
                            [--health-check-custom-text HEALTH_CHECK_CUSTOM_TEXT]
+                           [--api-version {v2,v3}]
 
 galactory is a partial Ansible Galaxy proxy that uploads and downloads collections, using an
 Artifactory generic repository as its backend.
@@ -133,6 +134,10 @@ optional arguments:
   --health-check-custom-text HEALTH_CHECK_CUSTOM_TEXT
                         Sets custom_text field for health check endpoint responses.
                         [env var: GALACTORY_HEALTH_CHECK_CUSTOM_TEXT]
+  --api-version {v2,v3}
+                        The API versions to serve. Can be set to limit functionality to specific versions only.
+                        Defaults to all supported versions.
+                        [env var: GALACTORY_API_VERSION]
 
 Args that start with '--' (eg. --listen-addr) can also be set in a config file
 (/etc/galactory.d/*.conf or ~/.galactory/*.conf or specified via -c). Config file syntax allows:

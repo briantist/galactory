@@ -11,7 +11,7 @@ from artifactory import ArtifactoryPath
 
 from .utilities import DateTimeIsoFormatJSONProvider
 
-from .api import bp as api
+from .api import create_blueprint as create_api_blueprint
 from .download import bp as download
 from .health import bp as health
 from .root import bp as root
@@ -23,7 +23,7 @@ def create_app(**config):
     app.config.update(**config)
     app.register_blueprint(health)
     app.register_blueprint(root)
-    app.register_blueprint(api)
+    app.register_blueprint(create_api_blueprint(app))
     app.register_blueprint(download)
 
     @app.before_request
@@ -99,6 +99,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
     parser.add_argument('--cache-write', action=_StrBool, default=True, env_var='GALACTORY_CACHE_WRITE', help='Populate the upstream cache in Artifactory. Should be false when no auth is provided or the auth has no permission to write.')
     parser.add_argument('--use-property-fallback', action='store_true', env_var='GALACTORY_USE_PROPERTY_FALLBACK', help='Set properties of an uploaded collection in a separate request after publshinng. Requires a Pro license of Artifactory. This feature is a workaround for an Artifactory proxy configuration error and may be removed in a future version.')
     parser.add_argument('--health-check-custom-text', type=str, default='', env_var='GALACTORY_HEALTH_CHECK_CUSTOM_TEXT', help='Sets custom_text field for health check endpoint responses.')
+    parser.add_argument('--api-version', action='append', choices=['v2', 'v3'], env_var='GALACTORY_API_VERSION', help='The API versions to serve. Can be set to limit functionality to specific versions only. Defaults to all supported versions.')
 
     if parse_known_only:
         args, _ = parser.parse_known_args()
@@ -175,6 +176,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
         CACHE_WRITE=args.cache_write,
         USE_PROPERTY_FALLBACK=args.use_property_fallback,
         HEALTH_CHECK_CUSTOM_TEXT=args.health_check_custom_text,
+        API_VERSION=args.api_version,
     )
 
     if proxy_fix:
