@@ -4,6 +4,7 @@
 import pytest
 
 import re
+from semver import VersionInfo
 from datetime import datetime, timezone
 from pytest_mock import MockFixture
 
@@ -34,6 +35,7 @@ def test_collectiongroup_init(namespace, name):
     assert isinstance(colgroup, CollectionGroup)
     assert colgroup.namespace == namespace
     assert colgroup.name == name
+    assert colgroup.fqcn == f"{namespace}.{name}"
     assert colgroup.latest is None
     assert len(colgroup) == len(colgroup.versions) == 0
 
@@ -90,10 +92,91 @@ def test_collectiongroup_add(mocker: MockFixture, namespace, name, collection_da
 
 
 def test_collectiongroup_from_collection(mocker: MockFixture, collection_data: CollectionData):
-    spy = mocker.spy(CollectionGroup, '__init__')
-
+    spy_init = mocker.spy(CollectionGroup, '__init__')
+    spy_add = mocker.spy(CollectionGroup, 'add')
     colgroup = CollectionGroup.from_collection(collection_data)
 
-    spy.assert_called_once_with(mocker.ANY, namespace=collection_data.namespace, name=collection_data.name)
+    spy_init.assert_called_once_with(colgroup, namespace=collection_data.namespace, name=collection_data.name)
+    spy_add.assert_called_once_with(colgroup, collection_data)
     assert len(colgroup) == 1
     assert colgroup.latest is collection_data
+
+
+def test_collectiongroup_dunders(mocker: MockFixture, collection_data: CollectionData):
+    colgroup = CollectionGroup.from_collection(collection_data)
+    spy_get_key = mocker.spy(colgroup, '_get_key')
+
+    assert colgroup[collection_data.semver] is collection_data
+    spy_get_key.assert_called_once_with(collection_data.semver)
+    spy_get_key.reset_mock()
+
+    assert collection_data.version in colgroup
+    spy_get_key.assert_called_once_with(collection_data.version, raises=False)
+    spy_get_key.reset_mock()
+
+
+def test_collectiongroup_delete(mocker: MockFixture, collection_data: CollectionData):
+    spy_del = mocker.spy(CollectionGroup, '__delitem__')
+
+    col1 = CollectionData.__new__(CollectionData)
+    col2 = CollectionData.__new__(CollectionData)
+
+    col1.__dict__.update(collection_data.__dict__.copy())
+    col2.__dict__.update(collection_data.__dict__.copy())
+
+    col1.version = '1.2.3'
+    col1.sha256 = 'A'
+    col2.version = '2.3.4'
+    col2.sha256 = 'B'
+
+    assert col1 is not col2
+    assert col1 != col2
+    assert col1 < col2
+    assert col2 > col1
+
+    colgroup = CollectionGroup.from_collection(col1)
+    assert colgroup.latest is col1
+
+    colgroup.add(col2)
+    assert len(colgroup) == 2
+    assert col1 in colgroup.values()
+    assert col2 in colgroup.values()
+    assert colgroup.latest is col2
+
+    del(colgroup[col2.version])
+    spy_del.assert_called_once_with(colgroup, col2.version)
+    spy_del.reset_mock()
+    assert colgroup.latest is col1
+
+    del(colgroup[col1.semver])
+    spy_del.assert_called_once_with(colgroup, col1.semver)
+    assert colgroup.latest is None
+
+
+@pytest.mark.parametrize('version', ['1.2.3-dev0', '2.3.4', '0.0.0-alpha'])
+@pytest.mark.parametrize('as_vi', [True, False])
+def test_collectiongroup_get_key_good_versions(version, as_vi):
+    v = VersionInfo.parse(version)
+    if as_vi:
+        k = CollectionGroup._get_key(v)
+        assert k is v
+    else:
+        k = CollectionGroup._get_key(version)
+        assert k == v
+
+
+@pytest.mark.parametrize('version', ['1.2.3dev0', 'now2.3.4', '0.0.0.0.0.0.0'])
+def test_collectiongroup_get_key_bad_version_strings(version):
+    with pytest.raises(ValueError, match=rf"^{version} is not valid SemVer string$"):
+        CollectionGroup._get_key(version)
+
+
+@pytest.mark.parametrize('version', [list(), tuple(), dict(), True, 2, 3.14159])
+@pytest.mark.parametrize('raises', [True, False])
+def test_collectiongroup_get_key_bad_version_types(version, raises):
+    if raises:
+        with pytest.raises(TypeError, match=r"Only valid semantic versions can be used as keys.$"):
+            CollectionGroup._get_key(version, raises=raises)
+    else:
+        k = CollectionGroup._get_key(version, raises=raises)
+        assert k is version

@@ -133,7 +133,8 @@ class CollectionGroup(UserDict):
     def add(self, collection: CollectionData) -> None:
         self[collection.semver] = collection
 
-    def _get_key(self, key: t.Union[str, VersionInfo], *, raises: bool = True) -> VersionInfo:
+    @staticmethod
+    def _get_key(key: t.Union[str, VersionInfo], *, raises: bool = True) -> VersionInfo:
         if isinstance(key, VersionInfo):
             return key
         elif isinstance(key, str):
@@ -160,7 +161,11 @@ class CollectionGroup(UserDict):
         return super().__setitem__(self._get_key(key), item)
 
     def __delitem__(self, key: t.Union[str, VersionInfo]) -> None:
-        return super().__delitem__(self._get_key(key))
+        dkey = self._get_key(key)
+        super().__delitem__(dkey)
+
+        if self.latest == dkey:
+            self.latest = max(self.values(), default=None)
 
     def __contains__(self, key: t.Union[str, VersionInfo]) -> bool:
         return super().__contains__(self._get_key(key, raises=False))
