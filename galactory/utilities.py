@@ -13,6 +13,7 @@ from tempfile import SpooledTemporaryFile
 from urllib3 import Retry
 from requests.adapters import HTTPAdapter
 from requests import Session
+from base64io import Base64IO
 
 from flask import current_app, abort, Response, Request
 from flask.json.provider import DefaultJSONProvider
@@ -131,6 +132,27 @@ def discover_collections(
 def lcm(a, b, *more):
     z = lcm(b, *more) if more else b
     return abs(a * z) // math.gcd(a, z)
+
+
+class IncomingCollectionStream:
+    def __new__(cls, stream: t.IO, *, format: str = None):
+        if format == 'raw':
+            return stream
+        if format == 'base64':
+            return Base64IO(stream)
+        return cls.detected_stream(stream)
+
+    @staticmethod
+    def detected_stream(stream: t.IO):
+        with gzip.GzipFile(fileobj=stream, mode='rb') as gz:
+            try:
+                gz.read(1)
+            except gzip.BadGzipFile:
+                return Base64IO(stream)
+            else:
+                return stream
+            finally:
+                stream.seek(0)
 
 
 class HashedTempFile():

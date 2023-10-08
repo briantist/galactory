@@ -1,0 +1,6 @@
+---
+bugfixes:
+  - The collection publish endpoint required the file data to be base64 encoded. This worked for ``ansible-core>=2.10`` but did  not work with Ansible 2.9 or other clients that were not aware of the need. Galactory can now detect and accept both raw bytes and base64 encoded content (https://github.com/briantist/galactory/issues/105).
+
+minor_changes:
+  - The option ``UPLOAD_FORMAT`` has been added to control the behavior of upload format detection. Auto-detection is attempted when the option is not set or set to ``auto``. Set it to ``base64`` to only accept base64-encoded content, or set it to ``raw`` to only accept unencoded content (https://github.com/briantist/galactory/pull/109).

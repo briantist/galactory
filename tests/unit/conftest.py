@@ -5,6 +5,7 @@ import pytest
 import json
 import sys
 
+from pathlib import Path
 from unittest import mock
 from shutil import copytree
 from artifactory import _ArtifactoryAccessor, _FakePathTemplate, ArtifactoryPath
@@ -32,14 +33,14 @@ def client(app):
 
 
 @pytest.fixture
-def virtual_fs_repo(fixture_finder, tmp_path):
+def virtual_fs_repo(fixture_finder, tmp_path: Path):
     repo = tmp_path / 'repo'
     copytree(fixture_finder('artifactory', 'virtual'), repo)
     return repo
 
 
 @pytest.fixture
-def mock_artifactory_accessor(fixture_loader, virtual_fs_repo):
+def mock_artifactory_accessor(fixture_loader, virtual_fs_repo: Path):
     class MockArtifactoryAccessor(_ArtifactoryAccessor):
         def __init__(self) -> None:
             super().__init__()
@@ -68,7 +69,7 @@ def mock_artifactory_accessor(fixture_loader, virtual_fs_repo):
 
 
 @pytest.fixture
-def mock_artifactory_path(mock_artifactory_accessor, virtual_fs_repo):
+def mock_artifactory_path(mock_artifactory_accessor, virtual_fs_repo: Path):
     _artifactory_accessor = mock_artifactory_accessor()
 
     class MockArtifactoryPath(ArtifactoryPath):
