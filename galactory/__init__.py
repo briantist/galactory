@@ -75,12 +75,12 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
     parser.add_argument('--artifactory-path', type=str, required=True, env_var='GALACTORY_ARTIFACTORY_PATH', help='The URL of the path in Artifactory where collections are stored.')
     parser.add_argument('--artifactory-api-key', type=str, env_var='GALACTORY_ARTIFACTORY_API_KEY', help='If set, is the API key used to access Artifactory. If set with artifactory-access-token, this value will not be used.')
     parser.add_argument('--artifactory-access-token', type=str, env_var='GALACTORY_ARTIFACTORY_ACCESS_TOKEN', help='If set, is the Access Token used to access Artifactory. If set with artifactory-api-key, this value will be used and the API key will be ignored.')
-    parser.add_argument('--use-galaxy-key', action='store_true', env_var='GALACTORY_USE_GALAXY_KEY', help='If set, uses the Galaxy token sent in the request as the Artifactory auth. DEPRECATED: This option will be removed in v0.11.0. Please use --use-galaxy-auth going forward.')
+    parser.add_argument('--use-galaxy-key', action='store_true', env_var='GALACTORY_USE_GALAXY_KEY', help='If set, uses the Galaxy token sent in the request as the Artifactory auth. DEPRECATED: This option will be removed in v0.12.0. Please use --use-galaxy-auth going forward.')
     parser.add_argument('--use-galaxy-auth', action='store_true', env_var='GALACTORY_USE_GALAXY_AUTH', help='If set, uses the Galaxy token sent in the request as the Artifactory auth.')
     parser.add_argument('--galaxy-auth-type', type=str, env_var='GALACTORY_GALAXY_AUTH_TYPE', choices=['api_key', 'access_token'], help='Auth received via a Galaxy request should be interpreted as this type of auth.')
-    parser.add_argument('--prefer-configured-key', action='store_true', env_var='GALACTORY_PREFER_CONFIGURED_KEY', help='If set, prefer the confgured Artifactory auth over the Galaxy token. DEPRECATED: This option will be removed in v0.11.0. Please use --prefer-configured-auth going forward.')
+    parser.add_argument('--prefer-configured-key', action='store_true', env_var='GALACTORY_PREFER_CONFIGURED_KEY', help='If set, prefer the confgured Artifactory auth over the Galaxy token. DEPRECATED: This option will be removed in v0.12.0. Please use --prefer-configured-auth going forward.')
     parser.add_argument('--prefer-configured-auth', action='store_true', env_var='GALACTORY_PREFER_CONFIGURED_AUTH', help='If set, prefer the confgured Artifactory auth over the Galaxy token.')
-    parser.add_argument('--publish-skip-configured-key', action='store_true', env_var='GALACTORY_PUBLISH_SKIP_CONFIGURED_KEY', help='If set, publish endpoint will not use configured auth, only auth included in a Galaxy request. DEPRECATED: This option will be removed in v0.11.0. Please use --publish-skip-configured-auth going forward.')
+    parser.add_argument('--publish-skip-configured-key', action='store_true', env_var='GALACTORY_PUBLISH_SKIP_CONFIGURED_KEY', help='If set, publish endpoint will not use configured auth, only auth included in a Galaxy request. DEPRECATED: This option will be removed in v0.12.0. Please use --publish-skip-configured-auth going forward.')
     parser.add_argument('--publish-skip-configured-auth', action='store_true', env_var='GALACTORY_PUBLISH_SKIP_CONFIGURED_AUTH', help='If set, publish endpoint will not use configured auth, only auth included in a Galaxy request.')
     parser.add_argument('--log-file', type=str, env_var='GALACTORY_LOG_FILE', help='If set, logging will go to this file instead of the console.')
     parser.add_argument(
@@ -108,49 +108,49 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
 
     logging.basicConfig(filename=args.log_file, level=args.log_level)
 
-    # TODO: v0.11.0 - remove conditional old name
+    # TODO: v0.12.0 - remove conditional old name
     if args.use_galaxy_key and not args.use_galaxy_auth:
         use_galaxy_auth = True
         warnings.warn(
             message=(
-                "USE_GALAXY_KEY has been replaced by USE_GALAXY_AUTH and the old name will be removed in v0.11.0."
+                "USE_GALAXY_KEY has been replaced by USE_GALAXY_AUTH and the old name will be removed in v0.12.0."
                 " To suppress this warning, set USE_GALAXY_AUTH."
             ), category=DeprecationWarning, stacklevel=2
         )
     else:
         use_galaxy_auth = args.use_galaxy_auth
 
-    # TODO: v0.11.0 - remove conditional & warning, set default on argument
+    # TODO: v0.12.0 - remove conditional & warning, set default on argument
     if args.galaxy_auth_type is None and use_galaxy_auth:
         galaxy_auth_type = 'api_key'
         warnings.warn(
             message=(
                 "USE_GALAXY_AUTH is True but GALAXY_AUTH_TYPE is not set."
-                " The default value used will be 'api_key' for backward compatibility, but will change to 'access_token' in v0.11.0."
+                " The default value used will be 'api_key' for backward compatibility, but will change to 'access_token' in v0.12.0."
                 " To suppress this warning, set an explicit value."
             ), category=FutureWarning, stacklevel=2
         )
     else:
         galaxy_auth_type = args.galaxy_auth_type
 
-    # TODO: v0.11.0 - remove conditional old name
+    # TODO: v0.12.0 - remove conditional old name
     if args.prefer_configured_key and not args.prefer_configured_auth:
         prefer_configured_auth = True
         warnings.warn(
             message=(
-                "PREFER_CONFIGURED_KEY has been replaced by PREFER_CONFIGURED_AUTH and the old name will be removed in v0.11.0."
+                "PREFER_CONFIGURED_KEY has been replaced by PREFER_CONFIGURED_AUTH and the old name will be removed in v0.12.0."
                 " To suppress this warning, set PREFER_CONFIGURED_AUTH."
             ), category=DeprecationWarning, stacklevel=2
         )
     else:
         prefer_configured_auth = args.prefer_configured_auth
 
-    # TODO: v0.11.0 - remove conditional old name
+    # TODO: v0.12.0 - remove conditional old name
     if args.publish_skip_configured_key and not args.publish_skip_configured_auth:
         publish_skip_configured_auth = True
         warnings.warn(
             message=(
-                "PUBLISH_SKIP_CONFIGURED_KEY has been replaced by PUBLISH_SKIP_CONFIGURED_AUTH and the old name will be removed in v0.11.0."
+                "PUBLISH_SKIP_CONFIGURED_KEY has been replaced by PUBLISH_SKIP_CONFIGURED_AUTH and the old name will be removed in v0.12.0."
                 " To suppress this warning, set PUBLISH_SKIP_CONFIGURED_AUTH."
             ), category=DeprecationWarning, stacklevel=2
         )
