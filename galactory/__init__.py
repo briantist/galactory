@@ -100,6 +100,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
     parser.add_argument('--use-property-fallback', action='store_true', env_var='GALACTORY_USE_PROPERTY_FALLBACK', help='Set properties of an uploaded collection in a separate request after publshinng. Requires a Pro license of Artifactory. This feature is a workaround for an Artifactory proxy configuration error and may be removed in a future version.')
     parser.add_argument('--health-check-custom-text', type=str, default='', env_var='GALACTORY_HEALTH_CHECK_CUSTOM_TEXT', help='Sets custom_text field for health check endpoint responses.')
     parser.add_argument('--api-version', action='append', choices=['v2', 'v3'], env_var='GALACTORY_API_VERSION', help='The API versions to serve. Can be set to limit functionality to specific versions only. Defaults to all supported versions.')
+    parser.add_argument('--upload-format', type=str, env_var='GALACTORY_UPLOAD_FORMAT', choices=['base64', 'raw', 'auto'], default='auto', help='Galaxy accepts the uploaded collection tarball as either raw bytes or base64 encoded. Ansible 2.9 uploads raw bytes, later versions upload base64. By default galactory will try to auto-detect. Use this option to turn off auto-detection and force a specific format.')
 
     if parse_known_only:
         args, _ = parser.parse_known_args()
@@ -177,6 +178,7 @@ def create_configured_app(run=False, parse_known_only=True, parse_allow_abbrev=F
         USE_PROPERTY_FALLBACK=args.use_property_fallback,
         HEALTH_CHECK_CUSTOM_TEXT=args.health_check_custom_text,
         API_VERSION=args.api_version,
+        UPLOAD_FORMAT=args.upload_format,
     )
 
     if proxy_fix:

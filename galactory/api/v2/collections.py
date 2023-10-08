@@ -2,7 +2,6 @@
 # (c) 2022 Brian Scholer (@briantist)
 
 from semver import VersionInfo
-from base64io import Base64IO
 from flask import Response, jsonify, abort, url_for, request, current_app
 
 from . import bp as v2
@@ -12,6 +11,7 @@ from ...utilities import (
     authorize,
     _chunk_to_temp,
     upload_collection_from_hashed_tempfile,
+    IncomingCollectionStream,
 )
 from ...upstream import ProxyUpstream
 from ...models import CollectionCollection
@@ -287,11 +287,12 @@ def publish():
     file = request.files['file']
     skip_configured_auth = current_app.config['PUBLISH_SKIP_CONFIGURED_AUTH']
     property_fallback = current_app.config.get('USE_PROPERTY_FALLBACK', False)
+    upload_format = current_app.config.get('UPLOAD_FORMAT')
     _scheme = current_app.config.get('PREFERRED_URL_SCHEME')
 
     target = authorize(request, current_app.config['ARTIFACTORY_PATH'] / file.filename, skip_configured_auth=skip_configured_auth)
 
-    with _chunk_to_temp(Base64IO(file)) as tmp:
+    with _chunk_to_temp(IncomingCollectionStream(file, format=upload_format)) as tmp:
         if tmp.sha256 != sha256:
             abort(Response(f"Hash mismatch: uploaded=='{sha256}', calculated=='{tmp.sha256}'", C.HTTP_INTERNAL_SERVER_ERROR))
 
