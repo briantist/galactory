@@ -5,7 +5,7 @@ from flask import Blueprint, Flask
 
 
 def create_blueprint(app: Flask):
-    api_version = app.config['API_VERSION']
+    api_version = app.config.get('API_VERSION')
     response = {
         'available_versions': {},
         'description': 'GALAXY REST API',
