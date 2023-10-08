@@ -45,7 +45,7 @@ usage: python -m galactory [-h] [-c CONFIG] [--listen-addr LISTEN_ADDR]
                            [--cache-read CACHE_READ] [--cache-write CACHE_WRITE]
                            [--use-property-fallback]
                            [--health-check-custom-text HEALTH_CHECK_CUSTOM_TEXT]
-                           [--api-version {v2,v3}]
+                           [--api-version {v2,v3}] [--upload-format {base64,raw,auto}]
 
 galactory is a partial Ansible Galaxy proxy that uploads and downloads collections, using an
 Artifactory generic repository as its backend.
@@ -138,6 +138,11 @@ optional arguments:
                         The API versions to serve. Can be set to limit functionality to specific versions only.
                         Defaults to all supported versions.
                         [env var: GALACTORY_API_VERSION]
+  --upload-format {base64,raw,auto}
+                        Galaxy accepts the uploaded collection tarball as either raw bytes or base64 encoded.
+                        Ansible 2.9 uploads raw bytes, later versions upload base64. By default galactory will
+                        try to auto-detect. Use this option to turn off auto-detection and force a specific format.
+                        [env var: GALACTORY_UPLOAD_FORMAT]
 
 Args that start with '--' (eg. --listen-addr) can also be set in a config file
 (/etc/galactory.d/*.conf or ~/.galactory/*.conf or specified via -c). Config file syntax allows:
