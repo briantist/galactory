@@ -2,14 +2,16 @@
 # (c) 2022 Brian Scholer (@briantist)
 
 import pytest
+import typing as t
 
 from datetime import datetime, timezone
+from functools import partial
 
 from galactory.models import CollectionData
 
 
 @pytest.fixture
-def collection_data(request) -> CollectionData:
+def collection_data_factory() -> t.Callable[[], CollectionData]:
     values = dict(
         collection_info={},
         namespace='ns',
@@ -22,6 +24,10 @@ def collection_data(request) -> CollectionData:
         size=0,
         version='0.0.0',
     )
+    return partial(CollectionData, **values)
+
+
+@pytest.fixture
+def collection_data(request, collection_data_factory) -> CollectionData:
     overrides = getattr(request, 'param', {})
-    values.update(overrides)
-    return CollectionData(**values)
+    return collection_data_factory(**overrides)

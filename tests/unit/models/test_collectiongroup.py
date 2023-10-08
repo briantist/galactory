@@ -98,19 +98,11 @@ def test_collectiongroup_dunders(mocker: MockFixture, collection_data: Collectio
     spy_get_key.reset_mock()
 
 
-def test_collectiongroup_delete(mocker: MockFixture, collection_data: CollectionData):
+def test_collectiongroup_delete(mocker: MockFixture, collection_data_factory):
     spy_del = mocker.spy(CollectionGroup, '__delitem__')
 
-    col1 = CollectionData.__new__(CollectionData)
-    col2 = CollectionData.__new__(CollectionData)
-
-    col1.__dict__.update(collection_data.__dict__.copy())
-    col2.__dict__.update(collection_data.__dict__.copy())
-
-    col1.version = '1.2.3'
-    col1.sha256 = 'A'
-    col2.version = '2.3.4'
-    col2.sha256 = 'B'
+    col1 = collection_data_factory(version='1.2.3', sha256='A')
+    col2 = collection_data_factory(version='2.3.4', sha256='B')
 
     assert col1 is not col2
     assert col1 != col2
