@@ -104,8 +104,10 @@ class CollectionData:
 
 class CollectionGroup(UserDict):
     """
-    A dict-like object where the keys are collection names,
-    and the values are CollectionData objects.
+    A dict-like object that represents one or more
+    versions of a single collection. The keys are
+    VersionInfo objects and the values are
+    CollectionData objects.
     """
     latest: CollectionData = None
 
@@ -121,7 +123,7 @@ class CollectionGroup(UserDict):
         return instance
 
     @property
-    def versions(self) -> dict:
+    def versions(self) -> t.Dict[VersionInfo, CollectionData]:
         return self.data
 
     @cached_property
