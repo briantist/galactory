@@ -50,6 +50,79 @@ releases:
     fragments:
     - 88-prereleases.yml
     release_date: '2023-09-29'
+  0.11.0:
+    changes:
+      bugfixes:
+      - The ``href`` field of several API responses was incorrect, pointing back at
+        the URL requested instead of pointing at the collection endpoint (https://github.com/briantist/galactory/issues/103).
+      - The collection publish endpoint required the file data to be base64 encoded.
+        This worked for ``ansible-core>=2.10`` but did  not work with Ansible 2.9
+        or other clients that were not aware of the need. Galactory can now detect
+        and accept both raw bytes and base64 encoded content (https://github.com/briantist/galactory/issues/105).
+      deprecated_features:
+      - The ``PREFER_CONFIGURED_KEY`` configuration option has been replaced by ``PREFER_CONFIGURED_AUTH``
+        and the old name will be removed in ``v0.12.0`` (https://github.com/briantist/galactory/pull/77).
+      - The ``PUBLISH_SKIP_CONFIGURED_KEY`` configuration option has been replaced
+        by ``PUBLISH_SKIP_CONFIGURED_AUTH`` and the old name will be removed in ``v0.12.0``
+        (https://github.com/briantist/galactory/pull/77).
+      - The ``USE_GALAXY_KEY`` configuration option has been replaced by ``USE_GALAXY_AUTH``
+        and the old name will be removed in ``v0.12.0`` (https://github.com/briantist/galactory/pull/77).
+      - The default value of the new ``GALAXY_AUTH_TYPE`` configuration option, added
+        in this release, will change from ``api_key`` to ``access_token`` in ``v0.12.0``
+        (https://github.com/briantist/galactory/pull/77).
+      known_issues:
+      - Galactory does not support proper paginated responses or proxying. This has
+        always been the case and is not new to this release, but this bug is now tracked
+        (https://github.com/briantist/galactory/issues/99).
+      - Upstream proxying does not support translation of requests between API versions.
+        While galactory can serve both v2 and v3 simultaneously, an individual request
+        will be proxied to the upstream as is, so the configured upstream must support
+        the version of the request (https://github.com/briantist/galactory/pull/104).
+      major_changes:
+      - Galactory now supports v3 of the Galaxy API, both as a server, and as a client
+        for upstream proxying (https://github.com/briantist/galactory/issues/23, https://github.com/briantist/galactory/pull/104).
+      minor_changes:
+      - Added the ``API_VERSION`` multi-valued config option to control which version(s)
+        of the galaxy API are supported for the running instance (https://github.com/briantist/galactory/pull/104).
+      - Requests that are proxied to an upstream now override the query string to
+        always request 100 results. This is a slight, partial mitigation for our current
+        lack of true pagination suppport (https://github.com/briantist/galactory/issues/99,
+        https://github.com/briantist/galactory/pull/104).
+      - The ``download`` endpoint now supports a query string parameter ``galactory_upstream_url``.
+        When this parameter is set, and the requested artifact does not already exist
+        in artifactory, this exact URL will be used as the upstream location for this
+        file. If the parameter is not set, it uses the previous proxying behavior
+        for downloads, which is to append the route to the configured upstream to
+        determine its URL. API responses from galactory that contain a ``download_url``
+        field will automatically generate proper URLs with this parameter set, and
+        it does not require additional configuration or user concern (https://github.com/briantist/galactory/pull/104).
+      - The option ``UPLOAD_FORMAT`` has been added to control the behavior of upload
+        format detection. Auto-detection is attempted when the option is not set or
+        set to ``auto``. Set it to ``base64`` to only accept base64-encoded content,
+        or set it to ``raw`` to only accept unencoded content (https://github.com/briantist/galactory/pull/109).
+      release_summary: 'Galactory finally supports the Galaxy v3 API. If you''re using
+        the upstream proxy functionality with galaxy.ansible.com then this will be
+        required since they made the switch to galaxy_ng which no longer supports
+        API v2.
+
+
+        This release contains a lot of changes, but because support for v3 is so important
+        due to the recent galaxy change, I''ve tried hard to introduce no breaking
+        changes. Deprecations scheduled for this release have been postponed to the
+        next one.
+
+
+        This release should be a drop-in replacement if you''re up-to-date on the
+        previous release, without requiring any configuration changes. The v3 support
+        and other new features and bugfixes are active in the default configuration
+        and should have no breakages, but options are included to turn off some of
+        those features.'
+    fragments:
+    - 0.11.0.yml
+    - 104-v3-refactor.yml
+    - 108-auth-deprecation-extension.yml
+    - 109-upload-format.yml
+    release_date: '2023-10-08'
   0.2.0:
     changes:
       minor_changes:
