@@ -41,6 +41,7 @@ dependencies = [
 tests = [
     "pytest>=7.1,<8",
     "pytest-cov",
+    "pytest-mock",
     "coverage",
     # "pytest-docker-compose",
     # "ansible-runner",

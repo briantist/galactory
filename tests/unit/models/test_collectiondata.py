@@ -3,8 +3,11 @@
 
 import pytest
 
-from datetime import datetime, timedelta, timezone
 import semver
+from datetime import datetime, timedelta, timezone
+from pytest_mock import MockFixture
+
+from artifactory import ArtifactoryPath
 
 from galactory.models import CollectionData
 
@@ -139,3 +142,19 @@ def test_collectiondata_compare_versioninfo(
         assert (col < ver) == (col.semver < ver)
     else:
         assert (col < ver) == (col.is_prerelease)
+
+def test_from_artifactory_repository(mocker: MockFixture, repository: ArtifactoryPath):
+    spy = mocker.spy(CollectionData, '__init__')
+
+    col = None
+    for item in repository.iterdir():
+        if item.is_dir():
+            continue
+        if item.name.endswith('.tar.gz'):
+            props = item.properties
+            stat = item.stat()
+            col = CollectionData.from_artifactory_path(path=item, properties=props, stat=stat)
+            spy.assert_called_once()
+            spy.reset_mock()
+
+    assert col is not None, "Error, no collections found."
