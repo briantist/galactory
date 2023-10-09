@@ -190,27 +190,27 @@ def versions(namespace, collection):
     if len(collections) > 1:
         abort(C.HTTP_INTERNAL_SERVER_ERROR)
 
-    col = next(iter(collections.values()))
     vers = set()
-    for i in col.values():
-        results.append(
-            {
-                'href': url_for(
-                    ".version",
-                    namespace=i.namespace,
-                    collection=i.name,
-                    version=i.version,
-                    _external=False,
-                    _scheme=scheme,
-                ),
-                'version': i.version,
-                'created_at': i.created,
-                'updated_at': i.modified,
-                'marks': [],
-                'requires_ansible': None, # FIXME
-            }
-        )
-        vers.add(i.version)
+    for col in collections.values():
+        for i in col.values():
+            results.append(
+                {
+                    'href': url_for(
+                        ".version",
+                        namespace=i.namespace,
+                        collection=i.name,
+                        version=i.version,
+                        _external=False,
+                        _scheme=scheme,
+                    ),
+                    'version': i.version,
+                    'created_at': i.created,
+                    'updated_at': i.modified,
+                    'marks': [],
+                    'requires_ansible': None, # FIXME
+                }
+            )
+            vers.add(i.version)
 
     if upstream_result:
         for item in upstream_result['data']:

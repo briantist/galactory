@@ -258,8 +258,10 @@ class ProxyUpstream:
             current_app.logger.info(f"Rewriting '{this_url}' to '{rewritten}'")
             params = request.args.copy()
             if not no_paginate:
-                # FIXME: use the correct parameter for the galaxy API version
-                params['page_size'] = params['limit'] = 100
+                if 'v2' in this_url:
+                    params['page_size'] = 100
+                else:
+                    params['limit'] = 100
 
         headers = {k: v for k, v in request.headers.items() if k not in ['Authorization', 'Host']}
         headers['Accept'] = 'application/json, */*'
