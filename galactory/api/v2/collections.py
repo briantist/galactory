@@ -105,7 +105,7 @@ def collection(namespace, collection):
 
     if upstream_result:
         if colgroup is None:
-            result = upstream_result
+            return upstream_result
         else:
             try:
                 upstream_version = VersionInfo.parse(upstream_result['latest_version']['version'])
