@@ -5,6 +5,15 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.11.1
+=======
+
+Bugfixes
+--------
+
+- Requests for collections that were not already present in artifactory resulted in a 500 internal server error (https://github.com/briantist/galactory/issues/112, https://github.com/briantist/galactory/pull/116).
+- Requests proxied to a v2 upstream endpoint that supports pagination caused a 400 error from the upstream due to the inclusion of the v3 ``limit`` query string parameter (https://github.com/briantist/galactory/issues/113).
+
 v0.11.0
 =======
 
