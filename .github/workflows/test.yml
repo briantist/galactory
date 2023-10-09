@@ -57,10 +57,13 @@ jobs:
         uses: codecov/codecov-action@v3
 
 
-  build:
+  build-container:
     permissions:
       contents: read
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [arm64, amd64]
     outputs:
       container-description: ${{ steps.description.outputs.container-description }}
     steps:
@@ -68,16 +71,12 @@ jobs:
         with:
           show-progress: false
 
-      - name: Set vars
-        id: setvars
-        run: |
-          VER_TAG=${GITHUB_REF/refs\/tags\/v/}
-          echo "relver=${VER_TAG}" | tee --append $GITHUB_OUTPUT
-
       - name: Set up QEMU
+        if: matrix.platform == 'arm64'
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
+        if: matrix.platform == 'arm64'
         uses: docker/setup-buildx-action@v3
 
       - name: Build amd64
@@ -86,10 +85,11 @@ jobs:
           push: false
           context: .
           load: true
-          platforms: linux/amd64
+          platforms: linux/${{ matrix.platform }}
           tags: galactory:latest
 
       - name: Run container
+        if: matrix.platform == 'amd64'
         run: docker run --rm galactory --help
 
       - name: Extract container description
@@ -98,17 +98,19 @@ jobs:
           DESC=$(docker inspect --format '{{ index .Config.Labels "org.opencontainers.image.description" }}' galactory)
           echo "container-description=$DESC" | tee --append $GITHUB_OUTPUT
 
-      - name: Build arm64
-        uses: docker/build-push-action@v5
+
+  build-python:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
         with:
-          push: false
-          context: .
-          platforms: linux/arm64
-          tags: galactory:latest
+          show-progress: false
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Pre-reqs
         run: pip install --upgrade pip setuptools build twine
@@ -123,7 +125,7 @@ jobs:
         id: checkver
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          VER_TAG=${{ steps.setvars.outputs.relver }}
+          VER_TAG=${GITHUB_REF/refs\/tags\/v/}
 
           expected_sdist=galactory-${VER_TAG}.tar.gz
           expected_wheel=galactory-${VER_TAG}-py3-none-any.whl
@@ -142,7 +144,7 @@ jobs:
 
 
   container_release:
-    needs: [test, build]
+    needs: [test, build-container]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
@@ -178,10 +180,11 @@ jobs:
           tags: |
             ${{ env.UPSTREAM }}:${{ startsWith(github.ref, 'refs/tags/') && 'latest' || needs.test.outputs.branch }}
             ${{ env.UPSTREAM }}:${{ startsWith(github.ref, 'refs/tags/') && needs.test.outputs.relver || github.sha }}
-          outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=${{ needs.build.outputs.container-description }}
+          outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=${{ needs.build-container.outputs.container-description }}
+
 
   pypi_release:
-    needs: [test, build]
+    needs: [test, build-python]
     if: >-
       github.event_name == 'push'
       && startsWith(github.ref, 'refs/tags/')
@@ -201,7 +204,8 @@ jobs:
   github_release:
     needs:
       - test
-      - build
+      - build-container
+      - build-python
       - container_release
       - pypi_release
     if: >-
