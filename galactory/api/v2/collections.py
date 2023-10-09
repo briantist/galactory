@@ -178,23 +178,23 @@ def versions(namespace, collection):
     if len(collections) > 1:
         abort(C.HTTP_INTERNAL_SERVER_ERROR)
 
-    col = next(iter(collections.values()))
     vers = set()
-    for i in col.values():
-        results.append(
-            {
-                'href': url_for(
-                    ".version",
-                    namespace=i.namespace,
-                    collection=i.name,
-                    version=i.version,
-                    _external=True,
-                    _scheme=scheme,
-                ),
-                'version': i.version,
-            }
-        )
-        vers.add(i.version)
+    for col in collections.values():
+        for i in col.values():
+            results.append(
+                {
+                    'href': url_for(
+                        ".version",
+                        namespace=i.namespace,
+                        collection=i.name,
+                        version=i.version,
+                        _external=True,
+                        _scheme=scheme,
+                    ),
+                    'version': i.version,
+                }
+            )
+            vers.add(i.version)
 
     if upstream_result:
         for item in upstream_result['results']:
