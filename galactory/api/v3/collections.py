@@ -34,8 +34,7 @@ def collections():
                 ".collection",
                 namespace=colgroup.namespace,
                 collection=colgroup.name,
-                _external=False,
-                _scheme=scheme
+                _external=False
             ),
             'name': colgroup.name,
             'namespace': colgroup.namespace,
@@ -46,8 +45,7 @@ def collections():
                 ".versions",
                 namespace=colgroup.latest.namespace,
                 collection=colgroup.latest.name,
-                _external=False,
-                _scheme=scheme,
+                _external=False
             ),
             'highest_version': {
                 'href': url_for(
@@ -55,8 +53,7 @@ def collections():
                     namespace=colgroup.latest.namespace,
                     collection=colgroup.latest.name,
                     version=colgroup.latest.version,
-                    _external=False,
-                    _scheme=scheme,
+                    _external=False
                 ),
                 "version": colgroup.latest.version,
             },
@@ -66,7 +63,6 @@ def collections():
     this_url = url_for(
         ".collections",
         _external=False,
-        _scheme=scheme,
         **request.args
     )
 
@@ -134,8 +130,7 @@ def collection(namespace, collection):
             ".collection",
             namespace=colgroup.namespace,
             collection=colgroup.name,
-            _external=False,
-            _scheme=scheme
+            _external=False
         ),
         'name': colgroup.latest.name,
         'namespace': colgroup.latest.namespace,
@@ -146,8 +141,7 @@ def collection(namespace, collection):
             ".versions",
             namespace=colgroup.latest.namespace,
             collection=colgroup.latest.name,
-            _external=False,
-            _scheme=scheme,
+            _external=False
         ),
         'highest_version': {
             'href': url_for(
@@ -155,8 +149,7 @@ def collection(namespace, collection):
                 namespace=colgroup.latest.namespace,
                 collection=colgroup.latest.name,
                 version=colgroup.latest.version,
-                _external=False,
-                _scheme=scheme,
+                _external=False
             ),
             "version": colgroup.latest.version,
         },
@@ -200,8 +193,7 @@ def versions(namespace, collection):
                         namespace=i.namespace,
                         collection=i.name,
                         version=i.version,
-                        _external=False,
-                        _scheme=scheme,
+                        _external=False
                     ),
                     'version': i.version,
                     'created_at': i.created,
@@ -222,7 +214,6 @@ def versions(namespace, collection):
         namespace=namespace,
         collection=collection,
         _external=False,
-        _scheme=scheme,
         **request.args
     )
 
@@ -283,8 +274,7 @@ def version(namespace, collection, version):
                 ".collection",
                 namespace=info.namespace,
                 collection=info.name,
-                _external=False,
-                _scheme=scheme,
+                _external=False
             ),
             'name': info.name,
         },
@@ -304,8 +294,7 @@ def version(namespace, collection, version):
             ".collection",
             namespace=info.namespace,
             collection=info.name,
-            _external=False,
-            _scheme=scheme
+            _external=False
         ),
         'id': 0,
         'metadata': info.collection_info,
@@ -339,4 +328,4 @@ def publish():
 
         upload_collection_from_hashed_tempfile(target, tmp, property_fallback=property_fallback)
 
-    return jsonify(task=url_for(".import_singleton", _external=False, _scheme=_scheme))
+    return jsonify(task=url_for(".import_singleton", _external=False))
