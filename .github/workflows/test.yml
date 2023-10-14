@@ -90,8 +90,7 @@ jobs:
           tags: galactory:latest
 
       - name: Run container
-        if: matrix.platform == 'amd64'
-        run: docker run --rm galactory --help
+        run: docker run --platform ${{ matrix.platform }} --rm galactory --help
 
       - name: Extract container description
         id: description
