@@ -5,6 +5,14 @@ galactory Release Notes
 .. contents:: Topics
 
 
+v0.11.2
+=======
+
+Bugfixes
+--------
+
+- Using the ``PREFERRED_URL_SCHEME`` configuration option caused failure in Galaxy v3 due to its inapplicability to relative URLs. This now works correctly by not applying the preferred scheme to relative URLs, since they do not need to know the current scheme (https://github.com/briantist/galactory/issues/122, https://github.com/briantist/galactory/pull/123).
+
 v0.11.1
 =======
 

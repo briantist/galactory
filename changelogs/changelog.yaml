@@ -135,6 +135,17 @@ releases:
     fragments:
     - 114-bugfixes.yml
     release_date: '2023-10-08'
+  0.11.2:
+    changes:
+      bugfixes:
+      - Using the ``PREFERRED_URL_SCHEME`` configuration option caused failure in
+        Galaxy v3 due to its inapplicability to relative URLs. This now works correctly
+        by not applying the preferred scheme to relative URLs, since they do not need
+        to know the current scheme (https://github.com/briantist/galactory/issues/122,
+        https://github.com/briantist/galactory/pull/123).
+    fragments:
+    - 123-relative-url-scheme.yml
+    release_date: '2023-10-14'
   0.2.0:
     changes:
       minor_changes:
