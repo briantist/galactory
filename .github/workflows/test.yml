@@ -193,7 +193,7 @@ jobs:
       id-token: write
       # ^ PyPI OIDC
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
@@ -216,7 +216,7 @@ jobs:
       contents: write
       # ^ GitHub tag and release
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
