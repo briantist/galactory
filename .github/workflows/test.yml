@@ -21,6 +21,7 @@ jobs:
           - '3.9'
           - '3.10'
           - '3.11'
+          - '3.12'
     env:
       PYTEST_ADDOPTS: '--color=yes'
     outputs:
@@ -36,6 +37,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           cache: pip
+          allow-prereleases: true
 
       - name: Requirements
         run: |
